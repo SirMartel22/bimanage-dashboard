@@ -1,56 +1,107 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import Link from "next/link";
-import { Eye, EyeOff } from "lucide-react";
-import AuthLayout from "@/components/auth/AuthLayout";
+import React, { useState } from 'react';
+import Link from 'next/link';
+import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import AuthLayout from '@/components/auth/AuthLayout';
 
-const ResetPasswordPage = () => {
+export default function ResetPasswordPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
-    password: "",
+    password: '',
+    confirmPassword: ''
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [errors, setErrors] = useState({
+    password: '',
+    confirmPassword: ''
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // TODO: Handle sign in logic
-    console.log("PasswordReset:", formData);
+  const validatePassword = (password: string) => {
+    if (password.length < 8) {
+      return 'Password must be at least 8 characters';
+    }
+    if (!/(?=.*[a-z])/.test(password)) {
+      return 'Password must contain at least one lowercase letter';
+    }
+    if (!/(?=.*[A-Z])/.test(password)) {
+      return 'Password must contain at least one uppercase letter';
+    }
+    if (!/(?=.*\d)/.test(password)) {
+      return 'Password must contain at least one number';
+    }
+    return '';
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value
+    });
+
+    // Clear errors on change
+    setErrors({
+      ...errors,
+      [name]: ''
     });
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const passwordError = validatePassword(formData.password);
+    const confirmError = formData.password !== formData.confirmPassword 
+      ? 'Passwords do not match' 
+      : '';
+
+    if (passwordError || confirmError) {
+      setErrors({
+        password: passwordError,
+        confirmPassword: confirmError
+      });
+      return;
+    }
+
+    // TODO: Handle password reset logic
+    console.log('Resetting password');
+    
+    // Navigate to success page
+    router.push('/auth/success');
+  };
+
   return (
-    <AuthLayout
-      title="Password Reset"
-      subtitle="Create a new strong password to continue using iManage today"
+    <AuthLayout 
+      title="Reset Password" 
+      subtitle="Enter your new password"
     >
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-5 flex flex-col items-center"
-      >
-        {/* Password Input */}
-        <div className="w-full">
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
-            Password
+      <form onSubmit={handleSubmit} className="space-y-5">
+        {/* Back Button */}
+        <Link 
+          href="/auth/verify-otp" 
+          className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-4"
+        >
+          <ArrowLeft size={16} />
+          Back
+        </Link>
+
+        {/* New Password Input */}
+        <div>
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+            New Password
           </label>
           <div className="relative">
             <input
               id="password"
               name="password"
-              type={showPassword ? "text" : "password"}
+              type={showPassword ? 'text' : 'password'}
               required
               value={formData.password}
               onChange={handleChange}
-              placeholder="Min. 8 Characters"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all pr-12"
+              placeholder="Enter new password"
+              className={`w-full px-4 py-3 border ${errors.password ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all pr-12`}
             />
             <button
               type="button"
@@ -60,58 +111,71 @@ const ResetPasswordPage = () => {
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
           </div>
+          {errors.password && (
+            <p className="mt-1 text-sm text-red-500">{errors.password}</p>
+          )}
         </div>
 
         {/* Confirm Password Input */}
-        <div className="w-full">
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
+        <div>
+          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
             Confirm Password
           </label>
           <div className="relative">
             <input
-              id="password"
+              id="confirmPassword"
               name="confirmPassword"
-              type={showPassword ? "text" : "password"}
+              type={showConfirmPassword ? 'text' : 'password'}
               required
-              value={formData.password}
+              value={formData.confirmPassword}
               onChange={handleChange}
-              placeholder="Confirm your password"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all pr-12"
+              placeholder="Confirm new password"
+              className={`w-full px-4 py-3 border ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all pr-12`}
             />
             <button
               type="button"
-              onClick={() => setShowPassword(!showPassword)}
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
             >
-              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
           </div>
+          {errors.confirmPassword && (
+            <p className="mt-1 text-sm text-red-500">{errors.confirmPassword}</p>
+          )}
+        </div>
+
+        {/* Password Requirements */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <p className="text-sm font-medium text-gray-700 mb-2">Password must contain:</p>
+          <ul className="text-xs text-gray-600 space-y-1">
+            <li className="flex items-center gap-2">
+              <span className={formData.password.length >= 8 ? 'text-green-600' : 'text-gray-400'}>✓</span>
+              At least 8 characters
+            </li>
+            <li className="flex items-center gap-2">
+              <span className={/(?=.*[a-z])/.test(formData.password) ? 'text-green-600' : 'text-gray-400'}>✓</span>
+              One lowercase letter
+            </li>
+            <li className="flex items-center gap-2">
+              <span className={/(?=.*[A-Z])/.test(formData.password) ? 'text-green-600' : 'text-gray-400'}>✓</span>
+              One uppercase letter
+            </li>
+            <li className="flex items-center gap-2">
+              <span className={/(?=.*\d)/.test(formData.password) ? 'text-green-600' : 'text-gray-400'}>✓</span>
+              One number
+            </li>
+          </ul>
         </div>
 
         {/* Submit Button */}
         <button
           type="submit"
-          className="w-1/3 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-sm"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-sm"
         >
-          Submit
+          Reset Password
         </button>
-
-        {/* Sign Up Link */}
-        <p className="text-center text-gray-600 mt-6">
-          Already have an account?{" "}
-          <Link
-            href="/auth/signin"
-            className="text-blue-600 hover:text-blue-700 font-medium"
-          >
-            Login
-          </Link>
-        </p>
       </form>
     </AuthLayout>
   );
-};
-
-export default ResetPasswordPage;
+}

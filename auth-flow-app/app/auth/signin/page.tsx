@@ -29,6 +29,7 @@ const SignInPage = () => {
     <AuthLayout
       title="Sign In"
       subtitle="Welcome back!! Kindly login to continue running your business like a pro"
+      illustrationSrc="/illustrations/sign-in-illustration.svg"
     >
       <form
         onSubmit={handleSubmit}
