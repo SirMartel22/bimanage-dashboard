@@ -17,7 +17,7 @@ export default function AuthLayout({
   return (
     <div className="min-h-screen flex">
       {/* Left Panel - Illustration (Hidden on mobile) */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 to-blue-500 items-center justify-center p-12 relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 bg-[#085AD9] items-center justify-center p-12 relative overflow-hidden">
         <div className="relative z-10 text-white max-w-md">
           <h1 className="text-3xl xl:text-4xl font-bold mb-4 leading-tight">
             {illustrationText}

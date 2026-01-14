@@ -30,9 +30,12 @@ const SignInPage = () => {
       title="Sign In"
       subtitle="Welcome back!! Kindly login to continue running your business like a pro"
     >
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-5 flex flex-col items-center "
+      >
         {/* Email Input */}
-        <div>
+        <div className="w-full">
           <label
             htmlFor="email"
             className="block text-sm font-medium text-gray-700 mb-2"
@@ -52,7 +55,7 @@ const SignInPage = () => {
         </div>
 
         {/* Password Input */}
-        <div>
+        <div className="w-full">
           <label
             htmlFor="password"
             className="block text-sm font-medium text-gray-700 mb-2"
@@ -81,7 +84,7 @@ const SignInPage = () => {
         </div>
 
         {/* Remember Me & Forgot Password */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between space-x-12">
           <label className="flex items-center">
             <input
               type="checkbox"
@@ -100,7 +103,7 @@ const SignInPage = () => {
         {/* Submit Button */}
         <button
           type="submit"
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-sm"
+          className="w-1/2 bg-[#085AD9] hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-sm"
         >
           Sign In
         </button>
