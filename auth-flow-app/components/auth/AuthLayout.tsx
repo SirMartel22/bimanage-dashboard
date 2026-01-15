@@ -14,19 +14,19 @@ export default function AuthLayout({
   title,
   subtitle,
   illustrationText = "Grow Smart. Sell Smarter. Manage Everything with Manage.",
-  illustrationSrc = "/illustrations/sign-up-illustration.svg"
+  illustrationSrc = "/illustrations/sign-up-illustration.svg",
 }: AuthLayoutProps) {
   return (
     <div className="min-h-screen flex rounded-lg shadow-[0_0_40px_rgba(0,0,0,0.1)]">
       {/* Left Panel - Illustration (Hidden on mobile) */}
-      <div className="w-full hidden lg:flex lg:w-1/2 bg-[#085AD9] items-center justify-start p-12 relative overflow-hidden rounded-bl-md rounded-tl-md rounded-tr-xl rounded-br-xl">
+      <div className="w-full hidden lg:flex lg:w-1/2 bg-[#085AD9] items-center justify-around p-12 relative overflow-hidden rounded-bl-md rounded-tl-md rounded-tr-xl rounded-br-xl">
         <div className="relative z-10 text-white max-w-md">
-          <h1 className="text-3xl xl:text-4xl font-bold mb-4 leading-tight">
+          <h1 className="text-3xl xl:text-4xl font-semibold mb-4 leading-tight">
             {illustrationText}
           </h1>
 
           {/* Placeholder for illustration - we'll add the actual image later */}
-          <div className="mt-8 flex items-center justify-center">
+          <div className="">
             {/* <div className="w-80 h-80 bg-blue-400/20 rounded-lg flex items-center justify-center">
               <p className="text-sm opacity-70">Illustration Area</p>
             </div> */}
@@ -51,8 +51,12 @@ export default function AuthLayout({
         <div className="w-full max-w-md">
           {/* Title */}
           <div className="mb-8 text-center ">
-            <h2 className="text-3xl font-bold text-gray-900 mb-8 ">{title}</h2>
-            {subtitle && <p className="text-gray-600 ">{subtitle}</p>}
+            <h2 className="text-[30px] font-bold text-gray-900 mb-8 ">
+              {title}
+            </h2>
+            {subtitle && (
+              <p className="text-gray-600 text-[12px]">{subtitle}</p>
+            )}
           </div>
 
           {/* Form Content */}
