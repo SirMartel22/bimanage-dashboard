@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+// import Link from "next/link";
+// import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import AuthLayout from "@/components/auth/AuthLayout";
 
@@ -32,7 +32,7 @@ export default function VerifyOtpPage() {
 
   const handleKeyDown = (
     index: number,
-    e: React.KeyboardEvent<HTMLInputElement>
+    e: React.KeyboardEvent<HTMLInputElement>,
   ) => {
     // Handle backspace
     if (e.key === "Backspace" && !otp[index] && index > 0) {
@@ -42,18 +42,18 @@ export default function VerifyOtpPage() {
 
   const handlePaste = (e: React.ClipboardEvent) => {
     e.preventDefault();
-    const pastedData = e.clipboardData.getData("text").slice(0, 6);
+    const pastedData = e.clipboardData.getData("text").slice(0, 4);
 
     if (!/^\d+$/.test(pastedData)) return;
 
     const newOtp = [...otp];
     pastedData.split("").forEach((char, index) => {
-      if (index < 6) newOtp[index] = char;
+      if (index < 4) newOtp[index] = char;
     });
     setOtp(newOtp);
 
     // Focus last filled input or next empty
-    const lastFilledIndex = Math.min(pastedData.length - 1, 5);
+    const lastFilledIndex = Math.min(pastedData.length - 1, 3);
     inputRefs.current[lastFilledIndex]?.focus();
   };
 
@@ -61,8 +61,8 @@ export default function VerifyOtpPage() {
     e.preventDefault();
     const otpCode = otp.join("");
 
-    if (otpCode.length === 6) {
-      // TODO: Handle OTP verification logic
+    if (otpCode.length === 4) {
+      //  Handle OTP verification logic
       console.log("Verifying OTP:", otpCode);
 
       // Navigate to reset password page
@@ -71,9 +71,9 @@ export default function VerifyOtpPage() {
   };
 
   const handleResend = () => {
-    setOtp(["", "", "", "", "", ""]);
+    setOtp(["", "", "", ""]);
     inputRefs.current[0]?.focus();
-    // TODO: Handle resend OTP logic
+    //  Handle resend OTP logic
     console.log("Resending OTP...");
   };
 
@@ -82,20 +82,15 @@ export default function VerifyOtpPage() {
   return (
     <AuthLayout
       title="Enter OTP"
-      subtitle="We've sent a 6-digit code to your email"
+      subtitle="Enter the code sent to ad***********12@gmail.com to reset your password"
     >
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Back Button */}
-        <Link
-          href="/auth/forgot-password"
-          className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-4"
-        >
-          <ArrowLeft size={16} />
-          Back
-        </Link>
-
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-6 flex flex-col items-center justify-center"
+      >
         {/* OTP Input Boxes */}
-        <div className="flex gap-3 justify-center">
+        <label className="w-full">Enter OTP</label>
+        <div className="flex gap-3 lg:gap-18 justify-start items-center w-full">
           {otp.map((digit, index) => (
             <input
               key={index}
@@ -109,8 +104,8 @@ export default function VerifyOtpPage() {
               onChange={(e) => handleChange(index, e.target.value)}
               onKeyDown={(e) => handleKeyDown(index, e)}
               onPaste={handlePaste}
-              placeholder="_"
-              className="w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl font-bold border-none border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all"
+              // placeholder="_"
+              className=" h-14 sm:w-14 sm:h-16 text-center text-2xl font-bold border-0 border-b-2 border-black-300 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all"
             />
           ))}
         </div>
@@ -119,9 +114,9 @@ export default function VerifyOtpPage() {
         <button
           type="submit"
           disabled={!isComplete}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-1/2 bg-[#085AD9] cursor-pointer hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-sm mb-8"
         >
-          Verify OTP
+          Verify
         </button>
 
         {/* Resend OTP */}

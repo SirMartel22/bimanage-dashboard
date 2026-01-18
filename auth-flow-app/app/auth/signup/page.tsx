@@ -16,7 +16,7 @@ const SignUpPage = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Handle sign up logic
+    // Handle sign up logic
     console.log("Sign up:", formData);
   };
 
@@ -40,7 +40,7 @@ const SignUpPage = () => {
         <div className="w-full">
           <label
             htmlFor="name"
-            className="block text-[12px] font-medium text-gray-700 mb-2"
+            className="block text-[16px] font-medium text-gray-700 mb-2"
           >
             Full Name
           </label>
@@ -60,7 +60,7 @@ const SignUpPage = () => {
         <div className="w-full">
           <label
             htmlFor="email"
-            className="block text-[12px] font-medium text-gray-700 mb-2"
+            className="block text-[16px] font-medium text-gray-700 mb-2"
           >
             Email
           </label>
@@ -80,7 +80,7 @@ const SignUpPage = () => {
         <div className="w-full">
           <label
             htmlFor="username"
-            className="block text-[12px] font-medium text-gray-700 mb-2"
+            className="block text-[16px] font-medium text-gray-700 mb-2"
           >
             Username
           </label>
@@ -100,7 +100,7 @@ const SignUpPage = () => {
         <div className="w-full">
           <label
             htmlFor="password"
-            className="block text-[12px] font-medium text-gray-700 mb-2"
+            className="block text-[16px] font-medium text-gray-700 mb-2"
           >
             Password
           </label>
@@ -129,7 +129,7 @@ const SignUpPage = () => {
         <div className="w-full">
           <label
             htmlFor="confirm-password"
-            className="block text-[12px] font-medium text-gray-700 mb-2"
+            className="block text-[16px] font-medium text-gray-700 mb-2"
           >
             Confirm Password
           </label>
@@ -145,7 +145,7 @@ const SignUpPage = () => {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all pr-12"
             />
 
-            <div className="my-4 flex items-center justify-center gap-1">
+            <div className="my-3 flex items-center justify-center gap-1">
               <input type="checkbox" />
               <p>I agree to Terms & Conditions</p>
             </div>
@@ -168,7 +168,7 @@ const SignUpPage = () => {
         </button>
 
         {/* Divider */}
-        <div className="relative my-6">
+        <div className="relative my-2">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-gray-300"></div>
           </div>
@@ -208,7 +208,7 @@ const SignUpPage = () => {
         </div>
 
         {/* Sign In Link */}
-        <p className="text-center text-gray-600 mt-6">
+        <p className="text-center text-gray-600 mt-2">
           Already have an account?{" "}
           <Link
             href="/auth/signin"

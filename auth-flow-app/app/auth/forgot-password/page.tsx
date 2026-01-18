@@ -20,20 +20,15 @@ export default function ForgotPasswordPage() {
     <AuthLayout
       title="Forgot Password?"
       subtitle="Enter your email address to reset your password"
+      illustrationSrc="/illustrations/forgot-pass-illustration.svg"
     >
       {!isSubmitted ? (
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Back to Sign In */}
-          <Link
-            href="/auth/signin"
-            className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-4"
-          >
-            <ArrowLeft size={16} />
-            Back to Sign In
-          </Link>
-
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-5 flex flex-col items-center justify-center"
+        >
           {/* Email Input */}
-          <div>
+          <div className="w-full mt-8">
             <label
               htmlFor="email"
               className="block text-sm font-medium text-gray-700 mb-2"
@@ -55,9 +50,9 @@ export default function ForgotPasswordPage() {
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-sm"
+            className="w-1/2 bg-[#085AD9] cursor-pointer hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-sm mb-8"
           >
-            Send Reset Link
+            Submit
           </button>
 
           {/* Info Text */}
