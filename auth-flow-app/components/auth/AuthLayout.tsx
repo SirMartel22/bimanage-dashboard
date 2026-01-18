@@ -19,23 +19,20 @@ export default function AuthLayout({
   return (
     <div className="min-h-screen flex rounded-lg shadow-[0_0_40px_rgba(0,0,0,0.1)]">
       {/* Left Panel - Illustration (Hidden on mobile) */}
-      <div className="w-full hidden lg:flex lg:w-1/2 bg-[#085AD9] items-center justify-around p-12 relative overflow-hidden rounded-bl-md rounded-tl-md rounded-tr-xl rounded-br-xl">
-        <div className="relative z-10 text-white max-w-md">
-          <h1 className="text-3xl xl:text-4xl font-semibold mb-4 leading-tight">
+      <div className="w-full hidden lg:flex lg:w-1/2 bg-[#085AD9] items-center relative overflow-hidden rounded-bl-md rounded-tl-md rounded-tr-xl rounded-br-xl pt-24 pl-8 pb-8">
+        <div className="relative z-10 text-white lg:flex flex-col items-center gap-20 w-full">
+          <h1 className="text-5xl xl:text-5xl font-medium mb-4 leading-tight">
             {illustrationText}
           </h1>
 
           {/* Placeholder for illustration - we'll add the actual image later */}
           <div className="">
-            {/* <div className="w-80 h-80 bg-blue-400/20 rounded-lg flex items-center justify-center">
-              <p className="text-sm opacity-70">Illustration Area</p>
-            </div> */}
             <Image
               alt="illustration"
               src={illustrationSrc}
-              width={300}
-              height={300}
-              className="w-full max-w-sm"
+              width={500}
+              height={500}
+              className="w-full"
               priority
             />
           </div>
