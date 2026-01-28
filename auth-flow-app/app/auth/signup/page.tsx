@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
-// import AuthLayout from "@/components/auth/AuthLayout";
 import Image from "next/image";
 import AuthLayout from "@/components/authflow/AuthLayout";
 
@@ -47,7 +46,7 @@ const SignUpPage = () => {
 
         <form
           onSubmit={handleSubmit}
-          className="space-y-5 flex flex-col items-center justify-center py-8 px-8 w-full"
+          className="space-y-5 flex flex-col items-center justify-center py-8 px-8 lg:px-24 w-full"
         >
           {/* Name Input */}
           <div className="w-full">
