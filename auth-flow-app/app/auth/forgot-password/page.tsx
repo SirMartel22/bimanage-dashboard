@@ -21,10 +21,12 @@ export default function ForgotPasswordPage() {
     <div className="flex">
       <AuthLayout illustrationSrc="/illustrations/forgot-pass-illustration.svg"></AuthLayout>
 
-      <div className="flex flex-col items-center justify-center p-12 w-[50%]">
-        <div className="flex flex-col items-center justify-center p-12 gap-4">
-          <h1 className="font-black text-4xl text-center">Forgot Password?</h1>
-          <p className="font-sm text-center">
+      <div className="w-full lg:w-[50%]">
+        <div className="flex flex-col items-center justify-center mt-24">
+          <h1 className="font-black text-2xl lg:text-4xl text-center py-6">
+            Forgot Password?
+          </h1>
+          <p className="font-sm text-center text-sm max-w-[80%] lg:text-lg lg:max-w-108">
             Forgot password? Kindly enter your email address below to reset your
             password
           </p>
@@ -32,10 +34,10 @@ export default function ForgotPasswordPage() {
         {!isSubmitted ? (
           <form
             onSubmit={handleSubmit}
-            className="space-y-5 flex flex-col items-center justify-center w-[80%]"
+            className="space-y-5 flex flex-col items-center justify-center w-full"
           >
             {/* Email Input */}
-            <div className="w-full mt-8">
+            <div className=" w-[90%] mt-8">
               <label
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700 mb-2"
