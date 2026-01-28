@@ -3,7 +3,7 @@
 import React, { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import AuthLayout from "@/components/authflow/AuthLayout";
+// import AuthLayout from "@/components/authflow/AuthLayout";
 
 export default function SuccessPage() {
   const router = useRouter();
@@ -20,6 +20,7 @@ export default function SuccessPage() {
     <div className="text-center bg-[#085AD9]/500 h-screen px-16">
       <div className="text-center p-12 flex-flex-col justify-center items-center ">
         <div className=" bg-white h-[80vh] p-16 flex flex-col items-center justify-center">
+          
           {/* Success Message */}
           <div className="space-y-5">
             <h3 className="text-2xl font-medium lg:text-5xl font-bold text-gray-900">

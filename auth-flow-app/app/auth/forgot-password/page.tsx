@@ -5,7 +5,6 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 // import AuthLayout from "@/components/auth/AuthLayout";
 import AuthLayout from "@/components/authflow/AuthLayout";
-// import Link from 'next/link'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -19,11 +18,6 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    // <AuthLayout
-    //   title="Forgot Password?"
-    //   subtitle="Enter your email address to reset your password"
-    //   illustrationSrc="/illustrations/forgot-pass-illustration.svg"
-    // >
     <div className="flex">
       <AuthLayout illustrationSrc="/illustrations/forgot-pass-illustration.svg"></AuthLayout>
 
