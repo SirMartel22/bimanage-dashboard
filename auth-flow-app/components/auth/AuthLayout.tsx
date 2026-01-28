@@ -13,7 +13,7 @@ export default function AuthLayout({
   children,
   title,
   subtitle,
-  illustrationText = "Grow Smart. Sell Smarter. Manage Everything with Manage.",
+  illustrationText = "Grow Smart. Sell Smarter. Manage Everything with iManage.",
   illustrationSrc = "/illustrations/sign-up-illustration.svg",
 }: AuthLayoutProps) {
   return (

@@ -12,7 +12,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${dmSans.className} py-10 px-10`}>{children}</body>
+      {/* <body className={`${dmSans.className} py-10 px-10`}>{children}</body> */}
+      <body className={`${dmSans.className}`}>{children}</body>
     </html>
   );
 }
