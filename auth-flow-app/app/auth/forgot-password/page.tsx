@@ -18,7 +18,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="flex">
+    <div className="lg:flex">
       <AuthLayout illustrationSrc="/illustrations/forgot-pass-illustration.svg"></AuthLayout>
 
       <div className="w-full lg:w-[50%]">

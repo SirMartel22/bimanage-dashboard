@@ -2,9 +2,9 @@
 
 import React, { useState, useRef, useEffect } from "react";
 // import Link from "next/link";
-// import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
-import AuthLayout from "@/components/auth/AuthLayout";
+// import AuthLayout from "@/components/auth/AuthLayout";
+import AuthLayout from "@/components/authflow/AuthLayout";
 
 export default function VerifyOtpPage() {
   const router = useRouter();
@@ -80,64 +80,74 @@ export default function VerifyOtpPage() {
   const isComplete = otp.every((digit) => digit !== "");
 
   return (
-    <AuthLayout
-      title="Enter OTP"
-      subtitle="Enter the code sent to ad***********12@gmail.com to reset your password"
-    >
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-6 flex flex-col items-center justify-center"
-      >
-        {/* OTP Input Boxes */}
-        <label className="w-full">Enter OTP</label>
-        <div className="flex gap-3 lg:gap-18 justify-start items-center w-full">
-          {otp.map((digit, index) => (
-            <input
-              key={index}
-              ref={(el) => {
-                inputRefs.current[index] = el;
-              }}
-              type="text"
-              inputMode="numeric"
-              maxLength={1}
-              value={digit}
-              onChange={(e) => handleChange(index, e.target.value)}
-              onKeyDown={(e) => handleKeyDown(index, e)}
-              onPaste={handlePaste}
-              // placeholder="_"
-              className=" h-14 sm:w-14 sm:h-16 text-center text-2xl font-bold border-0 border-b-2 border-black-300 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all"
-            />
-          ))}
-        </div>
+    <div className="lg:flex">
+      <AuthLayout illustrationSrc=""></AuthLayout>
 
-        {/* Submit Button */}
-        <button
-          type="submit"
-          disabled={!isComplete}
-          className="w-1/2 bg-[#085AD9] cursor-pointer hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-sm mb-8"
-        >
-          Verify
-        </button>
-
-        {/* Resend OTP */}
-        <div className="text-center">
-          <p className="text-sm text-gray-600 mb-2">
-            Didn&apos;t receive the code?
+      <div className="w-full lg:w-[50%] lg:px-24">
+        <div className="flex flex-col items-center justify-center mt-24 lg:mb-16">
+          <h1 className="font-black text-2xl lg:text-4xl text-center py-6">
+            Enter OTP
+          </h1>
+          <p className="font-sm text-center text-sm max-w-[80%] lg:text-md lg:w-full">
+            Enter the code sent to ad************12@gmail.com to reset your
+            password.
           </p>
-          <button
-            type="button"
-            onClick={handleResend}
-            className="text-blue-600 hover:text-blue-700 font-medium text-sm"
-          >
-            Resend OTP
-          </button>
         </div>
+        <form
+          onSubmit={handleSubmit}
+          className="lg:space-y-6 flex flex-col items-center justify-center py-12"
+        >
+          {/* OTP Input Boxes */}
+          <label className="w-full font-bold pl-16 lg:pl-0">Enter OTP</label>
+          <div className="flex gap-2 lg:gap-18 justify-center items-center w-full">
+            {otp.map((digit, index) => (
+              <input
+                key={index}
+                ref={(el) => {
+                  inputRefs.current[index] = el;
+                }}
+                type="text"
+                inputMode="numeric"
+                maxLength={1}
+                value={digit}
+                onChange={(e) => handleChange(index, e.target.value)}
+                onKeyDown={(e) => handleKeyDown(index, e)}
+                onPaste={handlePaste}
+                // placeholder="_"
+                className=" w-12 h-14 text-center text-sm lg:text-2xl font-bold border-0 border-b-2 border-black-300 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all"
+              />
+            ))}
+          </div>
 
-        {/* Timer (Optional) */}
-        <p className="text-xs text-gray-500 text-center">
-          Code expires in 10:00
-        </p>
-      </form>
-    </AuthLayout>
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={!isComplete}
+            className="w-2/3 lg:w-1/2 bg-[#085AD9] cursor-pointer hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-sm mb-8 my-6"
+          >
+            Verify
+          </button>
+
+          {/* Resend OTP */}
+          <div className="text-center">
+            <p className="text-sm text-gray-600 mb-2">
+              Didn&apos;t receive the code?
+            </p>
+            <button
+              type="button"
+              onClick={handleResend}
+              className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+            >
+              Resend OTP
+            </button>
+          </div>
+
+          {/* Timer (Optional) */}
+          {/* <p className="text-xs text-gray-500 text-center">
+            Code expires in 10:00
+          </p> */}
+        </form>
+      </div>
+    </div>
   );
 }
