@@ -81,7 +81,7 @@ export default function VerifyOtpPage() {
 
   return (
     <div className="lg:flex">
-      <AuthLayout illustrationSrc=""></AuthLayout>
+      <AuthLayout illustrationSrc="/illustrations/enter-otp-illustration.svg"></AuthLayout>
 
       <div className="w-full lg:w-[50%] lg:px-24">
         <div className="flex flex-col items-center justify-center mt-24 lg:mb-16">
