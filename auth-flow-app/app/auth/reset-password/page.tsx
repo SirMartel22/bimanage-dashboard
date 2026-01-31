@@ -76,7 +76,7 @@ export default function ResetPasswordPage() {
 
   return (
     <div className="lg:flex">
-      <AuthLayout illustrationSrc="/illustrations/enter-otp-illustration.svg"></AuthLayout>
+      <AuthLayout illustrationSrc="/illustrations/password-reset-illustration.svg"></AuthLayout>
 
       <div className="w-full lg:w-[50%] lg:px-24">
         <div className="flex flex-col items-center justify-center mt-24 mb-12 lg:mb-12">
