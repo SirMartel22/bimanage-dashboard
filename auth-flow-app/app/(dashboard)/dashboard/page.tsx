@@ -278,7 +278,7 @@ const Dashboard = () => {
         {/* ── LEFT column: Reports + Recent Orders ── */}
         <div className="flex flex-col gap-6 flex-1 min-w-0">
           {/* Reports card */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+          <div className="bg-white rounded-2xl ">
             <div className="flex items-center justify-between mb-3">
               <span className="text-[14px] font-bold text-gray-900">
                 Reports
@@ -288,7 +288,7 @@ const Dashboard = () => {
               </button>
             </div>
             {/* Chart needs an explicit height — ResponsiveContainer requires a sized parent */}
-            <div className="w-full h-[200px]">
+            <div className="w-full h-[250px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart
                   data={chartData}
@@ -351,7 +351,7 @@ const Dashboard = () => {
           </div>
 
           {/* Recent Orders card */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+          <div className="bg-white rounded-2xl ">
             <div className="flex items-center justify-between mb-4">
               <span className="text-[14px] font-bold text-gray-900">
                 Recent Orders
@@ -370,9 +370,9 @@ const Dashboard = () => {
         </div>
 
         {/* ── RIGHT column: Analytics + Onboarding + Top Products ── */}
-        <div className="flex flex-col gap-6 w-full md:w-[260px] shrink-0">
+        <div className="flex flex-col gap-6 w-full md:w-[40%] shrink-0">
           {/* Analytics card */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+          <div className="bg-white rounded-2xl ">
             <div className="flex items-center justify-between mb-3">
               <span className="text-[14px] font-bold text-gray-900">
                 Analytics
@@ -382,7 +382,7 @@ const Dashboard = () => {
               </button>
             </div>
             <DonutChart />
-            <div className="flex flex-col gap-2 mt-3">
+            <div className="flex gap-2 mt-3 items-center justify-center mt-6 gap-4">
               {legendItems.map((l) => (
                 <div
                   key={l.label}
@@ -399,7 +399,7 @@ const Dashboard = () => {
           </div>
 
           {/* Onboarding card */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+          <div className="bg-white rounded-2xl ">
             <div className="flex items-center justify-between mb-1">
               <span className="text-[14px] font-bold text-gray-900">
                 Onboarding steps
@@ -438,7 +438,7 @@ const Dashboard = () => {
           </div>
 
           {/* Top Products empty card */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+          <div className="bg-white rounded-2xl  ">
             <div className="flex items-center justify-between mb-4">
               <span className="text-[14px] font-bold text-gray-900">
                 Top Products
@@ -458,7 +458,7 @@ const Dashboard = () => {
       </div>
 
       {/* ── Chat FAB ── */}
-      <div className="fixed bottom-5 right-5 w-11 h-11 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center cursor-pointer shadow-lg shadow-blue-500/40 z-50">
+      <div className="fixed bottom-5 right-5 w-11 h-11 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center cursor-pointer ">
         <MdChat size={20} color="#fff" />
       </div>
     </div>
