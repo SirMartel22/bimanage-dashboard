@@ -82,7 +82,7 @@ const productSold = [
 
 const stockPercent = { available: 70, low: 20, out: 10 };
 
-const Dashboard = () => {
+const InventoryDashboard = () => {
   const [copied, setCopied] = useState(false);
   const url = "https://imanage.com.ng";
 
@@ -349,4 +349,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default InventoryDashboard;
