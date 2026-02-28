@@ -34,7 +34,7 @@ export default function SuccessPage() {
           {/* Sign In Button */}
           <div className="pt-4 lg:w-1/4 w-1/2">
             <Link
-              href="/auth/signin"
+              href="/signin"
               className="inline-block w-full bg-[#fff]/500 lg:bg-blue-600 hover:bg-blue-700 lg:text-white font-semibold rounded-md lg:rounded-full transition-colors duration-200 shadow-sm p-2 lg:p-4"
             >
               Go to Home Page

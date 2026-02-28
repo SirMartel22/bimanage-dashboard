@@ -113,7 +113,7 @@ export default function ForgotPasswordPage() {
 
             {/* Back to Sign In */}
             <Link
-              href="/auth/signin"
+              href="/signin"
               className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 pt-4"
             >
               <ArrowLeft size={16} />
