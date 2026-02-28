@@ -9,6 +9,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+// import type{TooltipProps, TooltipPayloadEntry} from 'recharts'
 
 import {
   MdCopyAll,
@@ -155,12 +156,25 @@ const DonutChart = () => {
   );
 };
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+// type CustomTooltipProps = TooltipProps<number, string>;
+
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: Array<{
+    name?: string;
+    value?: number;
+    color?: string;
+    [key: string]: unknown;
+  }>;
+  label?: string;
+}
+
+const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   if (active && payload?.length) {
     return (
       <div className="bg-gray-800 rounded-lg px-3 py-2 text-xs text-white shadow-lg">
         <p className="font-semibold text-gray-200 mb-1">{label}</p>
-        {payload.map((p: any, i: number) => (
+        {payload.map((p, i) => (
           <p key={i} style={{ color: p.color }} className="m-0">
             {p.name}: {p.value}
           </p>
