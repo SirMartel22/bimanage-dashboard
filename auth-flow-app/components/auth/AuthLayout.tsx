@@ -6,34 +6,39 @@ interface AuthLayoutProps {
   title: string;
   subtitle?: string;
   illustrationText?: string;
+  illustrationSrc?: string;
 }
 
 export default function AuthLayout({
   children,
   title,
   subtitle,
-  illustrationText = "Grow Smart. Sell Smarter. Manage Everything with Manage.",
+  illustrationText = "Grow Smart. Sell Smarter. Manage Everything with iManage.",
+  illustrationSrc = "/illustrations/sign-up-illustration.svg",
 }: AuthLayoutProps) {
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex rounded-lg shadow-[0_0_40px_rgba(0,0,0,0.1)]">
       {/* Left Panel - Illustration (Hidden on mobile) */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 to-blue-500 items-center justify-center p-12 relative overflow-hidden">
-        <div className="relative z-10 text-white max-w-md">
-          <h1 className="text-3xl xl:text-4xl font-bold mb-4 leading-tight">
-            {illustrationText}
-          </h1>
+      <div className="absolute w-full hidden lg:block lg:w-1/2 bg-[url('/illustrations/auth-bg.jpg')] bg-cover bg-center items-center relative overflow-hidden rounded-bl-md rounded-tl-md rounded-tr-xl rounded-br-xl ">
+        <div className="relative h-full bg-[#085AD9]/50 w-full pl-8 pb-8 flex items-center">
+          <div className="relative z-10 text-white lg:flex flex-col items-center gap-20 w-full">
+            <h1 className="text-5xl xl:text-4xl font-medium mb-4 leading-tight max-w-[90%]">
+              {illustrationText}
+            </h1>
 
-          {/* Placeholder for illustration - we'll add the actual image later */}
-          <div className="mt-8 flex items-center justify-center">
-            <div className="w-80 h-80 bg-blue-400/20 rounded-lg flex items-center justify-center">
-              <p className="text-sm opacity-70">Illustration Area</p>
+            {/* Placeholder for illustration - we'll add the actual image later */}
+            <div className="">
+              <Image
+                alt="illustration"
+                src={illustrationSrc}
+                width={500}
+                height={500}
+                className="w-full"
+                priority
+              />
             </div>
           </div>
         </div>
-
-        {/* Decorative circles */}
-        <div className="absolute top-20 right-20 w-32 h-32 bg-blue-400/20 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 left-20 w-40 h-40 bg-blue-300/20 rounded-full blur-3xl"></div>
       </div>
 
       {/* Right Panel - Form */}
@@ -41,8 +46,12 @@ export default function AuthLayout({
         <div className="w-full max-w-md">
           {/* Title */}
           <div className="mb-8 text-center ">
-            <h2 className="text-3xl font-bold text-gray-900 mb-8 ">{title}</h2>
-            {subtitle && <p className="text-gray-600 ">{subtitle}</p>}
+            <h2 className="text-[30px] font-bold text-gray-900 mb-4 ">
+              {title}
+            </h2>
+            {subtitle && (
+              <p className="text-gray-600 text-[16px]">{subtitle}</p>
+            )}
           </div>
 
           {/* Form Content */}
