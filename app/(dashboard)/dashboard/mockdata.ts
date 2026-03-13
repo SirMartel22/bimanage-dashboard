@@ -1,5 +1,5 @@
 import { UserProfile } from "./dashboard.types";
-import { UserType } from "./dashboard.types";
+// import { UserType } from "./dashboard.types";
 
 export const userProfiles: Record<string, UserProfile> = {
   new: {

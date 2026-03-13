@@ -1,8 +1,5 @@
 "use client";
 
-// export const dynamic = "force-dynamic";
-
-import React, { useState } from "react";
 
 import { useDashboard } from "./useDashboard";
 
@@ -161,16 +158,6 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
 // ── Dashboard Page ─────────────────────────────────────────────────────────
 
 const Dashboard = () => {
-  // const [copied, setCopied] = useState(false);
-  // const [showOnboarding, setShowOnboarding] = useState(false);
-  // const completedSteps = onboardingSteps.filter((s) => s.done).length;
-  // const url = "https://imanage.com.ng";
-
-  // const handleCopy = () => {
-  //   navigator.clipboard.writeText(url);
-  //   setCopied(true);
-  //   setTimeout(() => setCopied(false), 2000);
-  // };
 
   const {
     userType,
