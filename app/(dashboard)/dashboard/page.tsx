@@ -398,13 +398,6 @@ const Dashboard = () => {
               </button>
             </div>
 
-            {/* <div className="flex flex-col items-center justify-center gap-2.5 py-10 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-              <MdChecklist size={44} className="text-gray-300" />
-              <p className="text-xs text-gray-400">
-                You have no recent orders yet
-              </p>
-            </div> */}
-
             {profile.orders.length === 0 ? (
               <div className="flex flex-col items-center justify-center gap-2.5 py-10 bg-gray-50 rounded-xl border border-dashed border-gray-200">
                 <MdChecklist size={44} className="text-gray-300" />
@@ -530,13 +523,6 @@ const Dashboard = () => {
                   <MdMoreHoriz size={18} />
                 </button>
               </div>
-
-              {/* <div className="flex flex-col items-center justify-center gap-2.5 py-8 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                <MdShoppingBag size={36} className="text-gray-300" />
-                <p className="text-[11px] text-gray-400 text-center">
-                  You have no top selling products yet.
-                </p>
-              </div> */}
 
               {profile.topProducts.length === 0 ? (
                 <div className="flex flex-col items-center justify-center gap-2.5 py-8 bg-gray-50 rounded-xl border border-dashed border-gray-200">

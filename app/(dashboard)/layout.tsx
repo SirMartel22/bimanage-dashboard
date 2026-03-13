@@ -65,10 +65,10 @@ export default function SidebarLayout({ children }: SideBarLayoutProps) {
         {/* Logo */}
         <div className="flex items-center gap-2 px-[18px] py-5 border-b border-white/[0.08]">
           <div className="w-[30px] h-[30px] bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center text-white text-xs font-bold font-mono shrink-0">
-            iM
+            BiM
           </div>
           <span className="text-white text-[15px] font-bold tracking-wide">
-            iManage
+            BiManage
           </span>
         </div>
 
