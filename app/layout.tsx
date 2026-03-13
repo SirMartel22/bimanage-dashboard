@@ -5,6 +5,7 @@ const dmSans = DM_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "700"],
 });
+
 export default function RootLayout({
   children,
 }: {
@@ -12,7 +13,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      {/* <body className={`${dmSans.className} py-10 px-10`}>{children}</body> */}
+      <head>
+        <title>Bimanage Dashboard</title>
+      </head>
       <body className={`${dmSans.className}`}>{children}</body>
     </html>
   );

@@ -1,6 +1,8 @@
-'use client'
+"use client";
 
-export const dynamic = 'force-dynamic';
+// export const dynamic = 'force-dynamic';
+
+export const dynamic = "force-dynamic";
 
 const NotFoundPage = () => {
   return (
