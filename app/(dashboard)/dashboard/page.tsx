@@ -1,6 +1,5 @@
 "use client";
 
-
 import { useDashboard } from "./useDashboard";
 
 import {
@@ -13,11 +12,6 @@ import {
 } from "recharts";
 
 import {
-  MdCopyAll,
-  MdShare,
-  MdNotifications,
-  MdEmail,
-  MdKeyboardArrowDown,
   MdMoreHoriz,
   MdKeyboardArrowRight,
   MdInventory2,
@@ -29,31 +23,36 @@ import {
   MdChat,
 } from "react-icons/md";
 
+
+import Header from "@/components/header/Header"
+
 // ── Sub Components ─────────────────────────────────────────────────────────
 
 const StatCard = ({
   icon,
   value,
   label,
-  iconBg,
+  // iconBg,
 }: {
   icon: React.ReactNode;
-  value: number;
+  value: string | number;
   label: string;
   iconBg: string;
 }) => (
-  <div className="flex items-center gap-3">
+  <div className="flex items-center gap-1 md:gap-3">
     <div
-      className="w-[44px] h-[44px] rounded-[9px] flex items-center justify-center shrink-0"
-      style={{ background: iconBg }}
+      className="w-[12px] h-[12px] md:w-[44px] md:h-[44px] rounded-[9px] flex items-center justify-center shrink-0"
+      // style={{ background: iconBg }}
     >
       {icon}
     </div>
     <div className="flex flex-col">
-      <span className="text-[22px] font-bold text-gray-900 leading-none">
+      <span className="text-[15px] md:text-[22px] font-bold text-gray-900 leading-none">
         {value}
       </span>
-      <span className="text-[13px] text-gray-500 mt-0.5">{label}</span>
+      <span className="text-[8px] md:text-[13px] text-gray-500 mt-0.5">
+        {label}
+      </span>
     </div>
   </div>
 );
@@ -158,17 +157,13 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
 // ── Dashboard Page ─────────────────────────────────────────────────────────
 
 const Dashboard = () => {
-
   const {
     userType,
-    copied,
     showOnboarding,
     profile,
-    url,
     chartData,
     legendItems,
     onboardingSteps,
-    handleCopy,
     toggleOnboarding,
     toggleUserType,
   } = useDashboard();
@@ -176,81 +171,49 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* ── Topbar ── */}
-      <header className="sticky top-0 z-30 bg-white flex items-center gap-2.5 px-6 py-3 border-b border-gray-100">
-        <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-200 rounded-lg px-3 py-[5px] font-mono text-xs text-gray-700">
-          <span className="font-sans text-[11px] text-gray-400 mr-0.5">
-            Website url:
-          </span>
-          {url}
-        </div>
+      <Header />
 
-        <button
-          onClick={handleCopy}
-          className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-50 text-blue-500 hover:bg-blue-100 transition-colors border-none cursor-pointer"
-        >
-          <MdCopyAll size={14} />
-          {copied ? "Copied!" : "Copy"}
-        </button>
-
-        <button className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-500 text-white hover:bg-blue-600 transition-colors border-none cursor-pointer">
-          <MdShare size={14} />
-          Share
-        </button>
-
-        <div className="ml-auto flex items-center gap-3.5">
-          <button className="text-gray-400 hover:text-gray-600 transition-colors bg-transparent border-none cursor-pointer p-0 flex">
-            <MdNotifications size={20} />
-          </button>
-          <button className="text-gray-400 hover:text-gray-600 transition-colors bg-transparent border-none cursor-pointer p-0 flex">
-            <MdEmail size={20} />
-          </button>
-          <div className="flex items-center gap-2 cursor-pointer px-2 py-1 rounded-lg hover:bg-gray-50 transition-colors">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-[11px] font-bold text-white">
-              SA
-            </div>
-            <span className="text-[13px] font-semibold text-gray-700">
-              Samuel Adebayo
-            </span>
-            <MdKeyboardArrowDown size={17} className="text-gray-400" />
-          </div>
-        </div>
-      </header>
-
+      {/* items-center justify-around gap-4 px-6 py-5 border-b border-gray-100 w-[300px] */}
       {/* ── Stats Strip ── */}
-      <div className="flex items-center justify-around gap-4 px-6 py-5 border-b border-gray-100">
+      <div className="flex items-center justify-center md:justify-around gap-2 px-1 py-4 border-b border-gray-100 md:gap-2 md:px-6 md:py-6 ">
         {[
           {
             icon: <MdInventory2 size={28} color="#3b82f6" />,
             value: profile.stats.inventory,
             label: "Inventory",
             iconBg: "#eff6ff",
+            hasK: true,
           },
           {
             icon: <MdStar size={28} color="#f59e0b" />,
             value: profile.stats.sales,
             label: "Sales",
             iconBg: "#fffbeb",
+            hasK: true,
           },
           {
             icon: <MdShoppingBag size={28} color="#ef4444" />,
             value: profile.stats.stock,
             label: "Stock",
             iconBg: "#fef2f2",
+            hasK: false,
           },
           {
             icon: <MdChecklist size={28} color="#8b5cf6" />,
             value: profile.stats.todos,
             label: "To-do task",
             iconBg: "#f5f3ff",
+            hasK: false,
           },
         ].map((card) => (
           <div
             key={card.label}
-            className="bg-gray-50 rounded-xl flex items-center justify-center px-6 py-4 w-[200px]"
+            className="bg-gray-50 rounded-xl flex items-center justify-center md:justify-around px-2 py-2 w-[21%] md:px-6 md:py-4 md:w-[200px]"
           >
+            {/* value={card.hasK ? `${card.value}K` : card.value} */}
             <StatCard
               icon={card.icon}
-              value={card.value}
+              value={card.hasK ? `${card.value}K` : card.value}
               label={card.label}
               iconBg={card.iconBg}
             />
@@ -271,7 +234,7 @@ const Dashboard = () => {
           className={`text-xs px-3 py-1 rounded-md border transition-colors ${
             userType === "new"
               ? "bg-white text-gray-500 border-gray-200"
-              : "bg-blue-500 text-white border-blue-500"
+              : "bg-blue-500 texat-white border-blue-500"
           }`}
         >
           {userType === "new"
@@ -457,8 +420,8 @@ const Dashboard = () => {
               <div className="flex items-center justify-between">
                 <span className="text-[11px] text-gray-400">
                   {/* {completedSteps} of {onboardingSteps.length} complete */}
-
-                  {onboardingSteps.filter((s)=> s.done).length} of {onboardingSteps.length} complete
+                  {onboardingSteps.filter((s) => s.done).length} of{" "}
+                  {onboardingSteps.length} complete
                 </span>
                 <button
                   // onClick={() => setShowOnboarding((prev) => !prev)}

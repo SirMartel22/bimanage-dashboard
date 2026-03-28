@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import Header from "@/components/header/Header";
 
 import {
   AreaChart,
@@ -17,13 +17,6 @@ import { IoAddOutline } from "react-icons/io5";
 import { BsBagCheck } from "react-icons/bs";
 import { HiDotsHorizontal } from "react-icons/hi";
 import { FiCircle } from "react-icons/fi";
-import {
-  MdCopyAll,
-  MdShare,
-  MdNotifications,
-  MdEmail,
-  MdKeyboardArrowDown,
-} from "react-icons/md";
 
 const areaData = [
   { name: "Jan", value: 300 },
@@ -83,59 +76,10 @@ const productSold = [
 const stockPercent = { available: 70, low: 20, out: 10 };
 
 const InventoryDashboard = () => {
-  const [copied, setCopied] = useState(false);
-  const url = "https://imanage.com.ng";
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(url);
-    setCopied(true);
-    setTimeout(() => setCopied(true), 2000);
-  };
-
   return (
     <div className="p-4 bg-gray-50 min-h-screen font-sans">
-      {/* ── Topbar (sticky so it stays visible while scrolling) ── */}
-      <header className="sticky top-0 z-30 bg-white flex items-center gap-2.5 px-6 py-3 border-b border-gray-100 mb-6">
-        {/* URL pill */}
-        <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-200 rounded-lg px-3 py-[5px] font-mono text-xs text-gray-700">
-          <span className="font-sans text-[11px] text-gray-400 mr-0.5">
-            Website url:
-          </span>
-          {url}
-        </div>
-
-        <button
-          onClick={handleCopy}
-          className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-50 text-blue-500 hover:bg-blue-100 transition-colors border-none cursor-pointer"
-        >
-          <MdCopyAll size={14} />
-          {copied ? "Copied!" : "Copy"}
-        </button>
-
-        <button className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-500 text-white hover:bg-blue-600 transition-colors border-none cursor-pointer">
-          <MdShare size={14} />
-          Share
-        </button>
-
-        {/* Right side */}
-        <div className="ml-auto flex items-center gap-3.5">
-          <button className="text-gray-400 hover:text-gray-600 transition-colors bg-transparent border-none cursor-pointer p-0 flex">
-            <MdNotifications size={20} />
-          </button>
-          <button className="text-gray-400 hover:text-gray-600 transition-colors bg-transparent border-none cursor-pointer p-0 flex">
-            <MdEmail size={20} />
-          </button>
-          <div className="flex items-center gap-2 cursor-pointer px-2 py-1 rounded-lg hover:bg-gray-50 transition-colors">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-[11px] font-bold text-white">
-              SA
-            </div>
-            <span className="text-[13px] font-semibold text-gray-700">
-              Samuel Adebayo
-            </span>
-            <MdKeyboardArrowDown size={17} className="text-gray-400" />
-          </div>
-        </div>
-      </header>
+      {/* ── Topbar ── */}
+      <Header />
 
       {/* MAIN ROW: Left (stats + chart) + Right (stock availability) */}
       <div className="flex flex-col md:flex-row gap-4">

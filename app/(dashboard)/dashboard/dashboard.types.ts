@@ -4,7 +4,7 @@ export interface StatItem {
     inventory: number;
     sales: number;
     stock: number;
-    todos: number
+    todos: number;
 }
 
 export interface Order {

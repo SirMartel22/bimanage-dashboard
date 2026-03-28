@@ -11,7 +11,7 @@ export const userProfiles: Record<string, UserProfile> = {
   },
   existing: {
     name: "Evan",
-    stats: { inventory: 198000, sales: 2400, stock: 300, todos: 20 },
+    stats: { inventory: 198, sales: 2.4, stock: 300, todos: 20 },
     analyticsPercent: 80,
     orders: [
       { trackingNo: "#876364", productName: "Camera Lens", price: 178, totalOrder: 325, totalAmount: 146660 },

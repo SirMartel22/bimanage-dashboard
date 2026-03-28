@@ -1,9 +1,14 @@
 import React from "react";
+// import Header from "@/components/header/Header";
 
 const ProjectDashboard = () => {
   return (
     <div>
-      <h2>This is a Project Dashboard Page</h2>
+      {/* ── Topbar ── */}
+      {/* <Header /> */}
+      <div>
+        <h2>This is a Project Dashboard Page</h2>
+      </div>
     </div>
   );
 };

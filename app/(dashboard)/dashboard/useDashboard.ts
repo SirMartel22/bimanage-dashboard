@@ -1,3 +1,4 @@
+// "use client"
 import { useState } from "react"
 import { UserType } from "./dashboard.types";
 import { userProfiles, chartData, legendItems, onboardingSteps } from "./mockdata"
