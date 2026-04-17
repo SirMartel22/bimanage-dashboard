@@ -1,30 +1,88 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
 import AuthLayout from "@/components/authflow/AuthLayout";
 
+type SignUpFormState = {
+  name: string;
+  username: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  acceptedTerms: boolean;
+};
+
 const SignUpPage = () => {
-  const [formData, setFormData] = useState({
+  const router = useRouter();
+  const [formData, setFormData] = useState<SignUpFormState>({
     name: "",
+    username: "",
     email: "",
     password: "",
+    confirmPassword: "",
+    acceptedTerms: false,
   });
-  const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Handle sign up logic
-    console.log("Sign up:", formData);
-  };
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError(null);
+
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    if (!formData.acceptedTerms) {
+      setError("You must agree to the Terms & Conditions.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          username: formData.username,
+          email: formData.email,
+          password: formData.password,
+          confirmPassword: formData.confirmPassword,
+        }),
+        cache: "no-store",
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || "Signup failed");
+      }
+      router.push("/success");
+    } catch (error) {
+      console.log(error);
+      setError(error instanceof Error ? error.message : "Something went wrong");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -68,6 +126,26 @@ const SignUpPage = () => {
             />
           </div>
 
+          {/* Username input */}
+          <div className="w-full">
+            <label
+              htmlFor="username"
+              className="block text-sm lg:text-[16px] font-medium text-gray-700 mb-2"
+            >
+              Username
+            </label>
+            <input
+              id="username"
+              name="username"
+              type="text"
+              required
+              value={formData.username}
+              onChange={handleChange}
+              placeholder="simmexx"
+              className="w-full px-4 py-2 text-sm lg:text-[16px] border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all"
+            />
+          </div>
+
           {/* Email Input */}
           <div className="w-full">
             <label
@@ -84,26 +162,6 @@ const SignUpPage = () => {
               value={formData.email}
               onChange={handleChange}
               placeholder="Sammyjackson12@gmail.com"
-              className="w-full px-4 py-2 text-sm lg:text-[16px] border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all"
-            />
-          </div>
-
-          {/* Username input */}
-          <div className="w-full">
-            <label
-              htmlFor="username"
-              className="block text-sm lg:text-[16px] font-medium text-gray-700 mb-2"
-            >
-              Username
-            </label>
-            <input
-              id="name"
-              name="name"
-              type="text"
-              required
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="simmexx"
               className="w-full px-4 py-2 text-sm lg:text-[16px] border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all"
             />
           </div>
@@ -147,35 +205,43 @@ const SignUpPage = () => {
             </label>
             <div className="relative">
               <input
-                id="confirm-password"
-                name="password"
-                type={showPassword ? "text" : "password"}
+                id="confirmPassword"
+                name="confirmPassword"
+                type={showConfirmPassword ? "text" : "password"}
                 required
-                value={formData.password}
+                value={formData.confirmPassword}
                 onChange={handleChange}
                 placeholder="Confirm your password"
                 className="w-full px-4 py-2 text-sm lg:text-[16px] border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all pr-12"
               />
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
               >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
             <div className="my-4 lg:my-3 flex items-center justify-center gap-1 text-sm lg:text-lg">
-              <input type="checkbox" />
+              <input
+                type="checkbox"
+                name="acceptedTerms"
+                checked={formData.acceptedTerms}
+                onChange={handleChange}
+              />
               <p>I agree to Terms & Conditions</p>
             </div>
           </div>
 
+          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+
           {/* Submit Button */}
           <button
             type="submit"
+            disabled={isSubmitting}
             className="w-[90%] lg:w-1/2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-sm"
           >
-            Sign Up
+            {isSubmitting ? "Signing Up..." : "Sign Up"}
           </button>
 
           {/* Divider */}
