@@ -11,6 +11,15 @@ import {
   MdEmail,
   MdKeyboardArrowDown,
 } from "react-icons/md";
+import { useState, useEffect } from "react";
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  username?: string;
+  role?: string;
+}
 
 const Header = () => {
 
@@ -19,6 +28,50 @@ const Header = () => {
         handleCopy,
         copied
     } = useDashboard();
+
+    const [user, setUser] = useState<User | null>(null);
+
+    useEffect(() => {
+        // Try to get user from localStorage first for instant display
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+            try {
+                setUser(JSON.parse(storedUser));
+            } catch (e) {
+                console.error("Failed to parse stored user", e);
+            }
+        }
+
+        // Then fetch fresh data
+        const fetchUser = async () => {
+            const token = localStorage.getItem("token");
+            if (!token) return;
+
+            try {
+                const response = await fetch("/api/auth/me", {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    setUser(data.user);
+                    localStorage.setItem("user", JSON.stringify(data.user));
+                }
+            } catch (err) {
+                console.error("Failed to sync user in header", err);
+            }
+        };
+
+        fetchUser();
+    }, []);
+
+    const getInitials = (name: string) => {
+        return name
+            .split(" ")
+            .map((n) => n[0])
+            .join("")
+            .toUpperCase()
+            .slice(0, 2);
+    };
 
     
   return (
@@ -61,10 +114,10 @@ const Header = () => {
                 </button>
                 <div className="flex items-center gap-2 cursor-pointer px-2 py-1 rounded-lg hover:bg-gray-50 transition-colors">
                   <div className="w-7 h-7 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-[11px] font-bold text-white">
-                    SA
+                    {user ? getInitials(user.name) : "U"}
                   </div>
                   <span className="hidden md:block text-[13px] font-semibold text-gray-700">
-                    Samuel Adebayo
+                    {user?.name || "User"}
                   </span>
                   <MdKeyboardArrowDown size={17} className="text-gray-400" />
                 </div>

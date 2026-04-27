@@ -22,7 +22,7 @@ import {
   MdRadioButtonUnchecked,
   MdChat,
 } from "react-icons/md";
-
+import { useState, useEffect } from "react";
 
 import Header from "@/components/header/Header"
 
@@ -168,6 +168,22 @@ const Dashboard = () => {
     toggleUserType,
   } = useDashboard();
 
+  const [userName, setUserName] = useState<string>("User");
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        const user = JSON.parse(storedUser);
+        if (user.name) {
+          setUserName(user.name.split(" ")[0]); // Use first name for greeting
+        }
+      } catch (e) {
+        console.error("Failed to parse stored user in dashboard", e);
+      }
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* ── Topbar ── */}
@@ -223,7 +239,7 @@ const Dashboard = () => {
 
       {/* ── Greeting ── */}
       <div className="px-6 pt-5">
-        <p className="text-[16px] font-bold text-gray-900">Hello, Evan</p>
+        <p className="text-[16px] font-bold text-gray-900">Hello, {userName}</p>
       </div>
 
       {/* DEV ONLY — remove before production */}

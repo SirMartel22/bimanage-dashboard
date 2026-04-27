@@ -20,6 +20,8 @@ export default function ResetPasswordPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
   const [confirmFocused, setConfirmFocused] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({
     password: "",
     confirmPassword: "",
@@ -55,8 +57,9 @@ export default function ResetPasswordPage() {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
 
     const passwordError = validatePassword(formData.password);
     const confirmError =
@@ -72,11 +75,37 @@ export default function ResetPasswordPage() {
       return;
     }
 
-    // Handle password reset logic
-    console.log("Resetting password");
+    setIsSubmitting(true);
 
-    // Navigate to success page
-    router.push("/auth/success");
+    try {
+      const resetToken = localStorage.getItem("resetToken");
+      if (!resetToken) {
+        throw new Error("Reset token not found. Please verify your OTP again.");
+      }
+
+      const response = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${resetToken}`
+        },
+        body: JSON.stringify({ password: formData.password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Reset password failed");
+      }
+
+      // Success! Clear token and redirect
+      localStorage.removeItem("resetToken");
+      router.push("/success");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -171,12 +200,15 @@ export default function ResetPasswordPage() {
             )}
           </div>
 
+          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-1/2 bg-[#085AD9] cursor-pointer hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-sm mb-8 mt-6 lg:mt-8"
+            disabled={isSubmitting}
+            className="w-1/2 bg-[#085AD9] cursor-pointer hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-sm mb-8 mt-6 lg:mt-8"
           >
-            Reset Password
+            {isSubmitting ? "Resetting..." : "Reset Password"}
           </button>
         </form>
       </div>

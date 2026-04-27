@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
 import {
   MdSpaceDashboard,
   MdInventory,
@@ -11,6 +12,15 @@ import {
   MdSettings,
   MdLogout,
 } from "react-icons/md";
+import { useRouter } from "next/navigation";
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  username?: string;
+  role?: string;
+}
 
 interface NavItem {
   label: string;
@@ -57,6 +67,65 @@ const navItems: NavItem[] = [
 
 export default function SidebarLayout({ children }: SideBarLayoutProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        router.push("/signin");
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/auth/me", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch user");
+        }
+
+        const data = await response.json();
+        setUser(data.user);
+      } catch (error) {
+        console.error(error);
+        localStorage.removeItem("token");
+        router.push("/signin");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, [router]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    router.push("/signin");
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#0f1f38]">
+        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen">
@@ -103,19 +172,22 @@ export default function SidebarLayout({ children }: SideBarLayoutProps) {
           {/* User */}
           <div className="flex items-center gap-2 px-2 py-2">
             <div className="relative w-[30px] h-[30px] rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-[11px] font-bold text-white shrink-0">
-              SA
+              {user ? getInitials(user.name) : "U"}
               <span className="absolute bottom-0 right-0 w-2 h-2 bg-green-400 rounded-full border-[1.5px] border-[#0f1f38]"></span>
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-white text-[11.5px] font-semibold truncate">
-                Samuel Adebayo
+                {user?.name || "User"}
               </p>
-              <p className="text-white/40 text-[10px] mt-0.5">Admin ID</p>
+              <p className="text-white/40 text-[10px] mt-0.5">{user?.role || "Member"}</p>
             </div>
           </div>
 
           {/* Logout */}
-          <button className="flex items-center gap-[7px] w-full px-[10px] py-2 rounded-lg text-red-400 text-[12.5px] font-medium bg-transparent border-none cursor-pointer hover:bg-red-500/10 transition-colors duration-150 mt-0.5">
+          <button 
+            onClick={handleLogout}
+            className="flex items-center gap-[7px] w-full px-[10px] py-2 rounded-lg text-red-400 text-[12.5px] font-medium bg-transparent border-none cursor-pointer hover:bg-red-500/10 transition-colors duration-150 mt-0.5"
+          >
             <MdLogout size={15} />
             Log Out
           </button>
