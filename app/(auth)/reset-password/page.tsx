@@ -5,6 +5,7 @@
 import React, { useState } from "react";
 // import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
+import PasswordValidation from "@/components/authflow/PasswordValidation";
 import { useRouter } from "next/navigation";
 // import AuthLayout from "@/components/auth/AuthLayout";
 import AuthLayout from "@/components/authflow/AuthLayout";
@@ -17,6 +18,8 @@ export default function ResetPasswordPage() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
+  const [confirmFocused, setConfirmFocused] = useState(false);
   const [errors, setErrors] = useState({
     password: "",
     confirmPassword: "",
@@ -109,6 +112,7 @@ export default function ResetPasswordPage() {
                 required
                 value={formData.password}
                 onChange={handleChange}
+                onFocus={() => setPasswordFocused(true)}
                 placeholder="Enter new password"
                 className={`w-full px-4 py-3 border ${errors.password ? "border-red-500" : "border-gray-300"} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all pr-12`}
               />
@@ -120,6 +124,7 @@ export default function ResetPasswordPage() {
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
+            {passwordFocused && <PasswordValidation password={formData.password} />}
             {errors.password && (
               <p className="mt-1 text-sm text-red-500">{errors.password}</p>
             )}
@@ -141,6 +146,7 @@ export default function ResetPasswordPage() {
                 required
                 value={formData.confirmPassword}
                 onChange={handleChange}
+                onFocus={() => setConfirmFocused(true)}
                 placeholder="Confirm new password"
                 className={`w-full px-4 py-3 border ${errors.confirmPassword ? "border-red-500" : "border-gray-300"} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all pr-12`}
               />
@@ -152,6 +158,12 @@ export default function ResetPasswordPage() {
                 {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
+            {confirmFocused && (
+              <PasswordValidation 
+                password={formData.password} 
+                confirmPassword={formData.confirmPassword} 
+              />
+            )}
             {errors.confirmPassword && (
               <p className="mt-1 text-sm text-red-500">
                 {errors.confirmPassword}
