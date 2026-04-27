@@ -7,18 +7,34 @@ import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 // import AuthLayout from "@/components/auth/AuthLayout";
 import AuthLayout from "@/components/authflow/AuthLayout";
+import Image from "next/image";
+import { useLogin, useGoogleLogin } from "@/api/auth/hooks";
 
 const SignInPage = () => {
+  const loginMutation = useLogin();
+  const googleLogin = useGoogleLogin();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const isLoading = loginMutation.isPending;
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Handle sign in logic
-    console.log("Sign in:", formData);
+    setError("");
+
+    try {
+      await loginMutation.mutateAsync({
+        email: formData.email,
+        password: formData.password,
+      });
+      // Redirect is handled in the hook
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Login failed");
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -119,22 +135,56 @@ const SignInPage = () => {
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-[90%] lg:w-1/2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-sm"
+            disabled={isLoading}
+            className="w-[90%] lg:w-1/2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-sm"
           >
-            Sign In
+            {isLoading ? "Signing In..." : "Sign In"}
           </button>
 
-          {/* Sign Up Link */}
-          <p className="text-center text-gray-600 mt-6">
-            Don&apos;t have an account?{" "}
-            <Link
-              href="/signup"
-              className="text-blue-600 hover:text-blue-700 font-medium"
-            >
-              Sign Up
-            </Link>
-          </p>
+          {error && (
+            <p className="text-red-500 text-sm text-center">{error}</p>
+          )}
         </form>
+
+        {/* Sign Up Link */}
+        <p className="text-center text-gray-600 mt-6">
+          Don&apos;t have an account?{" "}
+          <Link
+            href="/signup"
+            className="text-blue-600 hover:text-blue-700 font-medium"
+          >
+            Sign Up
+          </Link>
+        </p>
+
+        {/* Divider */}
+        <div className="relative my-2">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-300"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-4 bg-white text-gray-500">
+              Or sign in with
+            </span>
+          </div>
+        </div>
+
+        {/* Social Login Buttons */}
+        <div className="flex gap-8 justify-center">
+          <button
+            type="button"
+            onClick={googleLogin}
+            className="flex items-center justify-center gap-3 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            <Image
+              src="/illustrations/google-logo.svg"
+              width={20}
+              height={20}
+              alt="google-icon"
+            />
+            <span className="text-gray-700 font-medium">Google</span>
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -1,9 +1,6 @@
-
 import Image from "next/image"
-
-import {useDashboard} from "@/app/(dashboard)/dashboard/useDashboard"
-
-
+import { useDashboard } from "@/app/(dashboard)/dashboard/useDashboard"
+import { useAuthStore } from "@/lib/store/auth-store";
 import {
   MdCopyAll,
   MdShare,
@@ -13,13 +10,22 @@ import {
 } from "react-icons/md";
 
 const Header = () => {
-
+    const user = useAuthStore((s) => s.user);
     const {
         url,
         handleCopy,
         copied
     } = useDashboard();
 
+    const getInitials = (name: string) => {
+      if (!name) return "SA";
+      return name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2);
+    };
     
   return (
     <div>
@@ -61,10 +67,10 @@ const Header = () => {
                 </button>
                 <div className="flex items-center gap-2 cursor-pointer px-2 py-1 rounded-lg hover:bg-gray-50 transition-colors">
                   <div className="w-7 h-7 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-[11px] font-bold text-white">
-                    SA
+                    {user ? getInitials(user.name) : "SA"}
                   </div>
                   <span className="hidden md:block text-[13px] font-semibold text-gray-700">
-                    Samuel Adebayo
+                    {user ? user.name : "Samuel Adebayo"}
                   </span>
                   <MdKeyboardArrowDown size={17} className="text-gray-400" />
                 </div>

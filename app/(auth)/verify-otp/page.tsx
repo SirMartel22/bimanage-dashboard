@@ -2,14 +2,29 @@
 // export const dynamic = "force-dynamic";
 import React, { useState, useRef, useEffect } from "react";
 // import Link from "next/link";
-import { useRouter } from "next/navigation";
-// import AuthLayout from "@/components/auth/AuthLayout";
+import { useRouter, useSearchParams } from "next/navigation";
 import AuthLayout from "@/components/authflow/AuthLayout";
+import { useVerifyEmail, useVerifyOtp, useResendOtp } from "@/api/auth/hooks";
 
 export default function VerifyOtpPage() {
   const router = useRouter();
-  const [otp, setOtp] = useState(["", "", "", ""]);
+  const searchParams = useSearchParams();
+  const verifyEmailMutation = useVerifyEmail();
+  const verifyOtpMutation = useVerifyOtp();
+  const resendOtpMutation = useResendOtp();
+  
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [email, setEmail] = useState("");
+  const [type, setType] = useState<"register" | "reset">("register");
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  useEffect(() => {
+    setEmail(searchParams.get("email") || "");
+    const typeParam = searchParams.get("type");
+    if (typeParam === "reset") setType("reset");
+  }, [searchParams]);
+
+  const isLoading = type === "register" ? verifyEmailMutation.isPending : verifyOtpMutation.isPending;
 
   useEffect(() => {
     // Focus first input on mount
@@ -42,39 +57,53 @@ export default function VerifyOtpPage() {
 
   const handlePaste = (e: React.ClipboardEvent) => {
     e.preventDefault();
-    const pastedData = e.clipboardData.getData("text").slice(0, 4);
+    const pastedData = e.clipboardData.getData("text").slice(0, 6);
 
     if (!/^\d+$/.test(pastedData)) return;
 
     const newOtp = [...otp];
     pastedData.split("").forEach((char, index) => {
-      if (index < 4) newOtp[index] = char;
+      if (index < 6) newOtp[index] = char;
     });
     setOtp(newOtp);
 
     // Focus last filled input or next empty
-    const lastFilledIndex = Math.min(pastedData.length - 1, 3);
+    const lastFilledIndex = Math.min(pastedData.length - 1, 5);
     inputRefs.current[lastFilledIndex]?.focus();
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const otpCode = otp.join("");
 
-    if (otpCode.length === 4) {
-      //  Handle OTP verification logic
-      console.log("Verifying OTP:", otpCode);
+    if (!email) {
+      console.error("Email is required for OTP verification.");
+      return;
+    }
 
-      // Navigate to reset password page
-      router.push("/auth/reset-password");
+    if (otpCode.length === 6) {
+      try {
+        if (type === "register") {
+          await verifyEmailMutation.mutateAsync({ email, otp: otpCode });
+        } else {
+          await verifyOtpMutation.mutateAsync({ email, otp: otpCode });
+        }
+      } catch (err) {
+        // Errors are handled by the hooks (sonner toast)
+      }
     }
   };
 
-  const handleResend = () => {
-    setOtp(["", "", "", ""]);
+  const handleResend = async () => {
+    if (!email) return;
+    setOtp(["", "", "", "", "", ""]);
     inputRefs.current[0]?.focus();
-    //  Handle resend OTP logic
-    console.log("Resending OTP...");
+    
+    try {
+      await resendOtpMutation.mutateAsync({ email });
+    } catch (err) {
+      // Handled by hook
+    }
   };
 
   const isComplete = otp.every((digit) => digit !== "");
@@ -89,8 +118,7 @@ export default function VerifyOtpPage() {
             Enter OTP
           </h1>
           <p className="font-sm text-center text-sm max-w-[80%] lg:text-md lg:w-full">
-            Enter the code sent to ad************12@gmail.com to reset your
-            password.
+            Enter the code sent to <span className="font-bold">{email || "your email"}</span> to {type === "register" ? "verify your account" : "reset your password"}.
           </p>
         </div>
         <form
@@ -122,11 +150,12 @@ export default function VerifyOtpPage() {
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={!isComplete}
-            className="w-2/3 lg:w-1/2 bg-[#085AD9] cursor-pointer hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-sm mb-8 my-6"
+            disabled={!isComplete || isLoading}
+            className="w-2/3 lg:w-1/2 bg-[#085AD9] hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-sm mb-8 my-6"
           >
-            Verify
+            {isLoading ? "Verifying..." : "Verify"}
           </button>
+
 
           {/* Resend OTP */}
           <div className="text-center">
