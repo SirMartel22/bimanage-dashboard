@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
+import PasswordValidation from "@/components/authflow/PasswordValidation";
 import Image from "next/image";
 import AuthLayout from "@/components/authflow/AuthLayout";
 
@@ -29,8 +30,14 @@ const SignUpPage = () => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
+  const [confirmFocused, setConfirmFocused] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleGoogleLogin = () => {
+    window.location.href = "https://bimanage-backend.onrender.com/api/auth/google";
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -182,6 +189,7 @@ const SignUpPage = () => {
                 required
                 value={formData.password}
                 onChange={handleChange}
+                onFocus={() => setPasswordFocused(true)}
                 placeholder="Min.8 c haracters"
                 className="w-full px-4 py-2 text-sm lg:text-[16px] border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all pr-12"
               />
@@ -193,6 +201,7 @@ const SignUpPage = () => {
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
+            {passwordFocused && <PasswordValidation password={formData.password} />}
           </div>
 
           {/* Confirm Password Input */}
@@ -211,6 +220,7 @@ const SignUpPage = () => {
                 required
                 value={formData.confirmPassword}
                 onChange={handleChange}
+                onFocus={() => setConfirmFocused(true)}
                 placeholder="Confirm your password"
                 className="w-full px-4 py-2 text-sm lg:text-[16px] border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all pr-12"
               />
@@ -222,6 +232,12 @@ const SignUpPage = () => {
                 {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
+            {confirmFocused && (
+              <PasswordValidation 
+                password={formData.password} 
+                confirmPassword={formData.confirmPassword} 
+              />
+            )}
             <div className="my-4 lg:my-3 flex items-center justify-center gap-1 text-sm lg:text-lg">
               <input
                 type="checkbox"
@@ -260,6 +276,7 @@ const SignUpPage = () => {
           <div className="flex gap-8">
             <button
               type="button"
+              onClick={handleGoogleLogin}
               className=" flex items-center justify-center gap-3 px-4 lg:py-2 lg:px-12 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <Image

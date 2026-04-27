@@ -5,6 +5,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
+import PasswordValidation from "@/components/authflow/PasswordValidation";
 // import AuthLayout from "@/components/auth/AuthLayout";
 import AuthLayout from "@/components/authflow/AuthLayout";
 
@@ -14,6 +15,11 @@ const SignInPage = () => {
     password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
+
+  const handleGoogleLogin = () => {
+    window.location.href = "https://bimanage-backend.onrender.com/api/auth/google";
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,6 +92,7 @@ const SignInPage = () => {
                 required
                 value={formData.password}
                 onChange={handleChange}
+                onFocus={() => setPasswordFocused(true)}
                 placeholder="Enter your password"
                 className="w-full text-sm lg:text-[16px] px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all pr-12"
               />
@@ -97,6 +104,7 @@ const SignInPage = () => {
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
+            {passwordFocused && <PasswordValidation password={formData.password} />}
           </div>
 
           {/* Remember Me & Forgot Password */}
