@@ -3,6 +3,7 @@
 // export const dynamic = "force-dynamic";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 import PasswordValidation from "@/components/authflow/PasswordValidation";
@@ -10,21 +11,59 @@ import PasswordValidation from "@/components/authflow/PasswordValidation";
 import AuthLayout from "@/components/authflow/AuthLayout";
 
 const SignInPage = () => {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleGoogleLogin = () => {
     window.location.href = "https://bimanage-backend.onrender.com/api/auth/google";
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Handle sign in logic
-    console.log("Sign in:", formData);
+    setError(null);
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Sign in failed");
+      }
+
+      // Store token
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+      }
+      
+      if (data.user) {
+        localStorage.setItem("user", JSON.stringify(data.user));
+      }
+
+      // Redirect to dashboard
+      router.push("/dashboard");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -124,12 +163,15 @@ const SignInPage = () => {
             </Link>
           </div>
 
+          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-[90%] lg:w-1/2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-sm"
+            disabled={isSubmitting}
+            className="w-[90%] lg:w-1/2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-sm"
           >
-            Sign In
+            {isSubmitting ? "Signing In..." : "Sign In"}
           </button>
 
           {/* Sign Up Link */}
