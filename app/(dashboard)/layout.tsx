@@ -20,6 +20,7 @@ interface User {
   email: string;
   username?: string;
   role?: string;
+  avatar?: string;
 }
 
 interface NavItem {
@@ -171,8 +172,12 @@ export default function SidebarLayout({ children }: SideBarLayoutProps) {
         <div className="px-[10px] pb-4 pt-3 border-t border-white/[0.08]">
           {/* User */}
           <div className="flex items-center gap-2 px-2 py-2">
-            <div className="relative w-[30px] h-[30px] rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-[11px] font-bold text-white shrink-0">
-              {user ? getInitials(user.name) : "U"}
+            <div className="relative w-[30px] h-[30px] rounded-full overflow-hidden bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-[11px] font-bold text-white shrink-0 border border-white/10">
+              {user?.avatar ? (
+                <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+              ) : (
+                user ? getInitials(user.name) : "U"
+              )}
               <span className="absolute bottom-0 right-0 w-2 h-2 bg-green-400 rounded-full border-[1.5px] border-[#0f1f38]"></span>
             </div>
             <div className="flex-1 min-w-0">
