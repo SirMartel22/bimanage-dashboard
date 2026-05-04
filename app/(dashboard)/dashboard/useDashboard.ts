@@ -1,16 +1,141 @@
-// "use client"
-import { useState } from "react"
-import { UserType } from "./dashboard.types";
-import { userProfiles, chartData, legendItems, onboardingSteps } from "./mockdata"
-
+import { useState, useEffect, useCallback, useRef } from "react"
+import { UserType, UserProfile, Order, TopProduct } from "./dashboard.types";
+import { chartData as mockChartData, legendItems, onboardingSteps } from "./mockdata"
 
 export const useDashboard = () => {
     const [userType, setUserType] = useState<UserType>("new");
     const [copied, setCopied] = useState(false);
-    const [showOnboarding, setShowOnboarding] = useState(false)
+    const [showOnboarding, setShowOnboarding] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    
+    const [profile, setProfile] = useState<UserProfile>({
+        name: "",
+        stats: { inventory: 0, sales: 0, stock: 0, todos: 0 },
+        analyticsPercent: 0,
+        orders: [],
+        topProducts: []
+    });
+    
+    const [user, setUser] = useState<any>(null);
+    const [chartData, setChartData] = useState(mockChartData);
 
-    const profile = userProfiles[userType];
     const url = "https://bimanage.com.ng";
+
+    const isFetching = useRef(false);
+
+    const fetchData = useCallback(async () => {
+        if (isFetching.current) return;
+        isFetching.current = true;
+        
+        setLoading(true);
+        setError(null);
+
+        const token = localStorage.getItem("token");
+        
+        if (!token) {
+            setError("No authentication token found");
+            setLoading(false);
+            return;
+        }
+
+        try {
+            const headers = { "Authorization": `Bearer ${token}` };
+
+            // Fetch all required data in parallel
+            const [statsRes, recentOrdersRes, tasksStatsRes, chartRes, userRes] = await Promise.all([
+                fetch("/api/inventory/stats", { headers }),
+                fetch("/api/orders/recent", { headers }),
+                fetch("/api/tasks/stats", { headers }),
+                fetch("/api/orders/chart?range=7days", { headers }),
+                fetch("/api/auth/me", { headers })
+            ]);
+
+            const statsData = await statsRes.json();
+            const recentOrdersData = await recentOrdersRes.json();
+            const tasksStatsData = await tasksStatsRes.json();
+            const chartDataResponse = await chartRes.json();
+            const userData = await userRes.json();
+            const actualUser = userData.user || userData;
+
+            // Handle user data
+            if (userRes.ok && actualUser && (actualUser.name || actualUser.email)) {
+                setUser(actualUser);
+                localStorage.setItem("user", JSON.stringify(actualUser));
+            }
+
+
+            const stats = statsData.data || statsData;
+            const recentOrders = Array.isArray(recentOrdersData.data) ? recentOrdersData.data : (Array.isArray(recentOrdersData) ? recentOrdersData : []);
+            const tasksStats = tasksStatsData.data || tasksStatsData;
+            const chartDataItems = Array.isArray(chartDataResponse.data) ? chartDataResponse.data : (Array.isArray(chartDataResponse) ? chartDataResponse : []);
+
+            // Determine if user is new or existing
+            const isNew = (stats.totalProducts === 0 || !stats.totalProducts) && (recentOrders.length === 0);
+            setUserType(isNew ? "new" : "existing");
+
+            // Transform recent orders to match UI format
+            const formattedOrders: Order[] = recentOrders.map((o: any) => ({
+                trackingNo: o._id?.slice(-6).toUpperCase() || "#000000",
+                productName: o.productId?.name || "Unknown Product",
+                price: o.productId?.sellingPrice || 0,
+                totalOrder: o.quantity || 0,
+                totalAmount: (o.productId?.sellingPrice || 0) * (o.quantity || 0)
+            }));
+
+            // Transform top selling products
+            const formattedTopProducts: TopProduct[] = (stats.topSelling || []).map((p: any) => ({
+                name: p.name,
+                price: p.sellingPrice,
+                rating: 5 // Default rating as API might not provide it
+            }));
+
+            // Calculate analytics percentage (e.g., completed orders vs total)
+            const salesAnalytics = stats.salesAnalytics || { totalOrders: 0, completedOrders: 0 };
+            const analyticsPercent = salesAnalytics.totalOrders > 0 
+                ? Math.round((salesAnalytics.completedOrders / salesAnalytics.totalOrders) * 100)
+                : 0;
+
+            setProfile({
+                name: actualUser?.name || "",
+                stats: {
+                    inventory: stats.totalProducts || 0,
+                    sales: stats.totalSales || 0,
+                    stock: stats.totalStock || 0,
+                    todos: tasksStats.total || 0
+                },
+                analyticsPercent,
+                orders: formattedOrders,
+                topProducts: formattedTopProducts
+            });
+
+            if (chartDataItems.length > 0) {
+                setChartData(chartDataItems);
+            } else if (isNew) {
+                // Create empty chart data for new users
+                const emptyChart = mockChartData.map(item => ({
+                    ...item,
+                    sales: 0,
+                    distribution: 0,
+                    returns: 0
+                }));
+                setChartData(emptyChart);
+            }
+
+
+        } catch (err) {
+            console.error("Dashboard fetch error:", err);
+            setError("Failed to load dashboard data");
+        } finally {
+            setLoading(false);
+            isFetching.current = false;
+        }
+
+    }, []);
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
 
     const handleCopy = () => {
         navigator.clipboard.writeText(url);
@@ -18,19 +143,18 @@ export const useDashboard = () => {
         setTimeout(() => setCopied(false), 2000);
     };
 
-
     const toggleOnboarding = () => setShowOnboarding((prev) => !prev)
     const toggleUserType = () => setUserType((prev) => (prev === "new" ? "existing" : "new"))
 
-
     return {
         // state
-        userType, copied, showOnboarding, profile, url,
-
-        // Static data
+        userType, copied, showOnboarding, profile, url, loading, error, user,
+        
+        // Data
         chartData, legendItems, onboardingSteps,
 
         // handlers
-        handleCopy, toggleOnboarding, toggleUserType,
+        handleCopy, toggleOnboarding, toggleUserType, refreshData: fetchData
     };
 };
+

@@ -22,7 +22,7 @@ import {
   MdRadioButtonUnchecked,
   MdChat,
 } from "react-icons/md";
-
+import { useState, useEffect } from "react";
 
 import Header from "@/components/header/Header"
 
@@ -32,32 +32,28 @@ const StatCard = ({
   icon,
   value,
   label,
-  // iconBg,
 }: {
   icon: React.ReactNode;
   value: string | number;
   label: string;
   iconBg: string;
 }) => (
-  <div className="flex items-center gap-1 md:gap-3">
-    <div
-      className="w-[12px] h-[12px] md:w-[44px] md:h-[44px] rounded-[9px] flex items-center justify-center shrink-0"
-      // style={{ background: iconBg }}
-    >
+  <div className="flex items-center gap-1.5 md:gap-3">
+    <div className="flex items-center justify-center shrink-0">
       {icon}
     </div>
-    <div className="flex flex-col">
-      <span className="text-[15px] md:text-[22px] font-bold text-gray-900 leading-none">
+    <div className="flex flex-col min-w-0">
+      <span className="text-[14px] md:text-[22px] font-bold text-gray-900 leading-none truncate">
         {value}
       </span>
-      <span className="text-[8px] md:text-[13px] text-gray-500 mt-0.5">
+      <span className="text-[8px] md:text-[13px] text-gray-400 mt-1 font-medium truncate uppercase tracking-tighter">
         {label}
       </span>
     </div>
   </div>
 );
 
-const DonutChart = () => {
+const DonutChart = ({ percent }: { percent: number }) => {
   const size = 140;
   const strokeWidth = 18;
   const r = (size - strokeWidth) / 2;
@@ -65,10 +61,11 @@ const DonutChart = () => {
   const cy = size / 2;
   const circumference = 2 * Math.PI * r;
 
-  const segments = [
-    { color: "#1e3a5f", pct: 0.4 },
-    { color: "#f5c842", pct: 0.35 },
-    { color: "#e85d4a", pct: 0.25 },
+  const segments = percent > 0 ? [
+    { color: "#1e3a5f", pct: percent / 100 },
+    { color: "#f3f4f6", pct: (100 - percent) / 100 },
+  ] : [
+    { color: "#f3f4f6", pct: 1 },
   ];
 
   let offset = 0;
@@ -111,7 +108,7 @@ const DonutChart = () => {
           fontWeight="700"
           fill="#111827"
         >
-          0%
+          {percent}%
         </text>
         <text
           x={cx}
@@ -141,12 +138,15 @@ interface CustomTooltipProps {
 const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   if (active && payload?.length) {
     return (
-      <div className="bg-gray-800 rounded-lg px-3 py-2 text-xs text-white shadow-lg">
+      <div className="bg-gray-800 rounded-lg px-3 py-2 text-xs text-white shadow-lg border border-gray-700">
         <p className="font-semibold text-gray-200 mb-1">{label}</p>
         {payload.map((p, i) => (
-          <p key={i} style={{ color: p.color }} className="m-0">
-            {p.name}: {p.value}
-          </p>
+          <div key={i} className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
+            <p className="m-0">
+              {p.name}: {p.value}
+            </p>
+          </div>
         ))}
       </div>
     );
@@ -166,40 +166,98 @@ const Dashboard = () => {
     onboardingSteps,
     toggleOnboarding,
     toggleUserType,
+    loading,
+    error,
+    user
   } = useDashboard();
 
-  return (
-    <div className="min-h-screen bg-white flex flex-col">
-      {/* ── Topbar ── */}
-      <Header />
+  const [userName, setUserName] = useState<string>("User");
 
-      {/* items-center justify-around gap-4 px-6 py-5 border-b border-gray-100 w-[300px] */}
+  useEffect(() => {
+    if (user && user.name) {
+      setUserName(user.name.split(" ")[0]);
+    } else {
+      // Fallback to localStorage if hook hasn't loaded yet
+      const storedUser = localStorage.getItem("user");
+      if (storedUser && storedUser !== "undefined" && storedUser !== "[object Object]") {
+        try {
+          const parsed = JSON.parse(storedUser);
+          if (parsed && parsed.name) {
+            setUserName(parsed.name.split(" ")[0]);
+          }
+        } catch (e) {
+          console.error("Failed to parse stored user", e);
+        }
+      }
+    }
+  }, [user]);
+
+
+
+  const formatStatValue = (val: number, hasK: boolean) => {
+    if (!hasK) return val;
+    if (val >= 1000) return `${(val / 1000).toFixed(1)}K`;
+    return val;
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center">
+        <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p className="text-gray-500 font-medium">Loading your dashboard...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6">
+        <div className="bg-red-50 text-red-600 p-4 rounded-xl border border-red-100 max-w-md text-center">
+          <p className="font-bold mb-2">Error loading dashboard</p>
+          <p className="text-sm">{error}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-white flex flex-col pb-20 md:pb-6">
+      {/* ── Topbar ── */}
+      <Header user={user} />
+
+
       {/* ── Stats Strip ── */}
-      <div className="flex items-center justify-center md:justify-around gap-2 px-1 py-4 border-b border-gray-100 md:gap-2 md:px-6 md:py-6 ">
+      <div className="flex items-center justify-between gap-2 px-3 py-6 border-b border-gray-100 md:justify-around md:px-6">
         {[
           {
-            icon: <MdInventory2 size={28} color="#3b82f6" />,
+            icon: <MdInventory2 size={20} className="md:w-7 md:h-7 text-blue-500" />,
             value: profile.stats.inventory,
             label: "Inventory",
             iconBg: "#eff6ff",
             hasK: true,
           },
           {
-            icon: <MdStar size={28} color="#f59e0b" />,
+            icon: <MdStar size={20} className="md:w-7 md:h-7 text-amber-500" />,
             value: profile.stats.sales,
             label: "Sales",
             iconBg: "#fffbeb",
             hasK: true,
           },
           {
-            icon: <MdShoppingBag size={28} color="#ef4444" />,
+            icon: <MdShoppingBag size={20} className="md:w-7 md:h-7 text-red-500" />,
             value: profile.stats.stock,
             label: "Stock",
             iconBg: "#fef2f2",
             hasK: false,
           },
           {
-            icon: <MdChecklist size={28} color="#8b5cf6" />,
+            icon: <MdChecklist size={20} className="md:w-7 md:h-7 text-purple-500" />,
             value: profile.stats.todos,
             label: "To-do task",
             iconBg: "#f5f3ff",
@@ -208,12 +266,18 @@ const Dashboard = () => {
         ].map((card) => (
           <div
             key={card.label}
-            className="bg-gray-50 rounded-xl flex items-center justify-center md:justify-around px-2 py-2 w-[21%] md:px-6 md:py-4 md:w-[200px]"
+            className="flex-1 flex items-center justify-center cursor-pointer"
+            onClick={() => {
+              if (card.label === "Inventory" || card.label === "Stock" || card.label === "Sales") {
+                window.location.href = "/inventory";
+              } else if (card.label === "To-do task") {
+                window.location.href = "/projects";
+              }
+            }}
           >
-            {/* value={card.hasK ? `${card.value}K` : card.value} */}
             <StatCard
               icon={card.icon}
-              value={card.hasK ? `${card.value}K` : card.value}
+              value={formatStatValue(card.value, card.hasK)}
               label={card.label}
               iconBg={card.iconBg}
             />
@@ -222,40 +286,77 @@ const Dashboard = () => {
       </div>
 
       {/* ── Greeting ── */}
-      <div className="px-6 pt-5">
-        <p className="text-[16px] font-bold text-gray-900">Hello, Evan</p>
+      <div className="px-6 pt-6">
+        <h1 className="text-xl md:text-2xl font-bold text-gray-900">Hello, {userName}</h1>
+        <p className="text-sm text-gray-500 mt-1">Here's what's happening with your business today.</p>
       </div>
 
       {/* DEV ONLY — remove before production */}
-      <div className="flex items-center gap-2 mx-6 mb-2 px-3 py-2 bg-yellow-50 border border-yellow-200 rounded-lg w-fit">
+      {/* <div className="flex items-center gap-2 mx-6 mt-4 mb-2 px-3 py-2 bg-yellow-50 border border-yellow-200 rounded-lg w-fit">
         <span className="text-xs text-yellow-700 font-medium">Testing:</span>
         <button
           onClick={toggleUserType}
           className={`text-xs px-3 py-1 rounded-md border transition-colors ${
             userType === "new"
               ? "bg-white text-gray-500 border-gray-200"
-              : "bg-blue-500 texat-white border-blue-500"
+              : "bg-blue-500 text-white border-blue-500"
           }`}
         >
           {userType === "new"
             ? "Switch to Existing User"
             : "Switch to New User"}
         </button>
-      </div>
+      </div> */}
 
       {/* ── BIGGER CONTAINER: flex-col, full width ── */}
       <div className="flex flex-col w-full px-6 py-5 gap-6">
+        {profile.orders.length === 0 && (
+          <div className="bg-gradient-to-br from-[#1e315f] to-[#2a457a] rounded-[24px] p-6 md:p-8 text-white relative overflow-hidden shadow-xl border-none">
+            {/* Design accents */}
+            <div className="absolute -top-10 -right-10 w-48 h-48 bg-white/5 rounded-full blur-2xl" />
+            <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-amber-400/10 rounded-full blur-xl" />
+            
+            <div className="relative z-10">
+              <h2 className="text-xl md:text-3xl font-black mb-3">Let's get started!!</h2>
+              <p className="text-white/80 text-xs md:text-sm max-w-lg mb-8 leading-relaxed font-medium">
+                Ready to take your business to the next level? Add your first product, 
+                track your inventory, and start making sales with ease.
+              </p>
+              
+              <div className="flex flex-wrap gap-3">
+                <button 
+                  onClick={() => window.location.href = "/inventory?action=add"}
+                  className="bg-white text-[#1e315f] px-6 py-2.5 rounded-xl font-bold text-xs md:text-sm hover:bg-gray-100 transition-all active:scale-95 shadow-md border-none cursor-pointer"
+                >
+                  Add Product
+                </button>
+                <button 
+                  onClick={() => window.location.href = "/inventory?action=stock-in"}
+                  className="bg-[#3b82f6]/20 backdrop-blur-md border border-white/10 text-white px-6 py-2.5 rounded-xl font-bold text-xs md:text-sm hover:bg-white/10 transition-all active:scale-95 cursor-pointer"
+                >
+                  Stock In
+                </button>
+                <button 
+                  onClick={() => window.location.href = "/inventory?action=sell"}
+                  className="bg-[#3b82f6]/20 backdrop-blur-md border border-white/10 text-white px-6 py-2.5 rounded-xl font-bold text-xs md:text-sm hover:bg-white/10 transition-all active:scale-95 cursor-pointer"
+                >
+                  Sell Product
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* ── ROW 1: Reports + Analytics ── */}
-        {/* flex-col on small, flex-row on md+ */}
-        <div className="flex flex-col md:flex-row gap-6 w-full">
-          {/* Reports card — equal half width */}
-          <div className="bg-white rounded-2xl w-full md:w-1/2 min-w-0">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[14px] font-bold text-gray-900">
+        <div className="flex flex-col lg:flex-row gap-6 w-full">
+          {/* Reports card */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-5 w-full lg:w-1/2 shadow-sm">
+            <div className="flex items-center justify-between mb-6">
+              <span className="text-[15px] font-bold text-gray-900">
                 Reports
               </span>
-              <button className="text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer p-0 flex">
-                <MdMoreHoriz size={18} />
+              <button className="text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer p-1 rounded-full hover:bg-gray-50 transition-colors">
+                <MdMoreHoriz size={20} />
               </button>
             </div>
             <div className="w-full h-[250px]">
@@ -266,12 +367,13 @@ const Dashboard = () => {
                 >
                   <XAxis
                     dataKey="time"
-                    tick={{ fontSize: 9, fill: "#9ca3af" }}
+                    tick={{ fontSize: 10, fill: "#9ca3af" }}
                     axisLine={false}
                     tickLine={false}
+                    dy={10}
                   />
                   <YAxis
-                    tick={{ fontSize: 9, fill: "#9ca3af" }}
+                    tick={{ fontSize: 10, fill: "#9ca3af" }}
                     axisLine={false}
                     tickLine={false}
                   />
@@ -280,61 +382,58 @@ const Dashboard = () => {
                     type="monotone"
                     dataKey="sales"
                     stroke="#6366f1"
-                    strokeWidth={2}
-                    dot={false}
+                    strokeWidth={3}
+                    dot={{ r: 4, fill: "#6366f1", strokeWidth: 2, stroke: "#fff" }}
+                    activeDot={{ r: 6, strokeWidth: 0 }}
                     name="Sales"
                   />
                   <Line
                     type="monotone"
                     dataKey="distribution"
-                    stroke="#a855f7"
-                    strokeWidth={2}
-                    dot={false}
+                    stroke="#f59e0b"
+                    strokeWidth={3}
+                    dot={{ r: 4, fill: "#f59e0b", strokeWidth: 2, stroke: "#fff" }}
+                    activeDot={{ r: 6, strokeWidth: 0 }}
                     name="Distribution"
                   />
                   <Line
                     type="monotone"
                     dataKey="returns"
-                    stroke="#ec4899"
-                    strokeWidth={2}
-                    dot={false}
+                    stroke="#ef4444"
+                    strokeWidth={3}
+                    dot={{ r: 4, fill: "#ef4444", strokeWidth: 2, stroke: "#fff" }}
+                    activeDot={{ r: 6, strokeWidth: 0 }}
                     name="Returns"
                   />
                 </LineChart>
               </ResponsiveContainer>
             </div>
-            <div className="flex items-center gap-4 mt-3">
-              <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 inline-block" />{" "}
-                Sales
-              </div>
-              <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                <span className="w-2.5 h-2.5 rounded-full bg-purple-500 inline-block" />{" "}
-                Distribution
-              </div>
-              <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                <span className="w-2.5 h-2.5 rounded-full bg-pink-500 inline-block" />{" "}
-                Returns
-              </div>
+            <div className="flex items-center gap-6 mt-6 justify-center">
+              {legendItems.map((item) => (
+                <div key={item.label} className="flex items-center gap-2 text-xs font-medium text-gray-500">
+                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
+                  {item.label}
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Analytics card — equal half width */}
-          <div className="bg-white rounded-2xl w-full md:w-1/2">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[14px] font-bold text-gray-900">
+          {/* Analytics card */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-5 w-full lg:w-1/2 shadow-sm">
+            <div className="flex items-center justify-between mb-6">
+              <span className="text-[15px] font-bold text-gray-900">
                 Analytics
               </span>
-              <button className="text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer p-0 flex">
-                <MdMoreHoriz size={18} />
+              <button className="text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer p-1 rounded-full hover:bg-gray-50 transition-colors">
+                <MdMoreHoriz size={20} />
               </button>
             </div>
-            <DonutChart />
-            <div className="flex gap-4 mt-6 items-center justify-center">
+            <DonutChart percent={profile.analyticsPercent} />
+            <div className="flex gap-6 mt-8 items-center justify-center">
               {legendItems.map((l) => (
                 <div
                   key={l.label}
-                  className="flex items-center gap-2 text-xs text-gray-500"
+                  className="flex items-center gap-2 text-xs font-medium text-gray-500"
                 >
                   <div
                     className="w-2.5 h-2.5 rounded-full shrink-0"
@@ -348,125 +447,133 @@ const Dashboard = () => {
         </div>
 
         {/* ── ROW 2: Recent Orders + (Onboarding + Top Products) ── */}
-        {/* flex-col on small, flex-row on md+ */}
-        <div className="flex flex-col md:flex-row gap-6 w-full">
-          {/* Recent Orders card — equal half width */}
-          <div className="bg-white rounded-2xl w-full md:w-1/2 min-w-0">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-[14px] font-bold text-gray-900">
+        <div className="flex flex-col lg:flex-row gap-6 w-full">
+          {/* Recent Orders card */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-5 w-full lg:w-1/2 shadow-sm overflow-hidden">
+            <div className="flex items-center justify-between mb-5">
+              <span className="text-[15px] font-bold text-gray-900">
                 Recent Orders
               </span>
-              <button className="text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer p-0 flex">
-                <MdMoreHoriz size={18} />
+              <button className="text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer p-1 rounded-full hover:bg-gray-50 transition-colors">
+                <MdMoreHoriz size={20} />
               </button>
             </div>
 
             {profile.orders.length === 0 ? (
-              <div className="flex flex-col items-center justify-center gap-2.5 py-10 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                <MdChecklist size={44} className="text-gray-300" />
-                <p className="text-xs text-gray-400">
+              <div className="flex flex-col items-center justify-center gap-4 py-12 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                <div className="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center">
+                  <MdChecklist size={32} className="text-blue-500" />
+                </div>
+                <p className="text-sm text-gray-400 font-medium">
                   You have no recent orders yet
                 </p>
               </div>
             ) : (
-              <table className="w-full text-xs">
-                <thead>
-                  <tr className="text-gray-400 border-b border-gray-100">
-                    <th className="text-left pb-2 font-medium">Tracking no</th>
-                    <th className="text-left pb-2 font-medium">Product Name</th>
-                    <th className="text-left pb-2 font-medium">Price</th>
-                    <th className="text-left pb-2 font-medium">Total Order</th>
-                    <th className="text-left pb-2 font-medium">Total Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {profile.orders.map((order) => (
-                    <tr
-                      key={order.trackingNo}
-                      className="border-b border-gray-50 hover:bg-gray-50 transition-colors"
-                    >
-                      <td className="py-2.5 text-gray-400">
-                        {order.trackingNo}
-                      </td>
-                      <td className="py-2.5 text-gray-700 font-medium">
-                        {order.productName}
-                      </td>
-                      <td className="py-2.5 text-gray-600">${order.price}</td>
-                      <td className="py-2.5">
-                        <span className="bg-blue-50 text-blue-500 px-2 py-0.5 rounded-full font-semibold">
-                          {order.totalOrder}
-                        </span>
-                      </td>
-                      <td className="py-2.5 text-gray-700">
-                        ${order.totalAmount.toLocaleString()}
-                      </td>
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs min-w-[500px]">
+                  <thead>
+                    <tr className="text-gray-400 border-b border-gray-100">
+                      <th className="text-left pb-3 font-semibold">Tracking no</th>
+                      <th className="text-left pb-3 font-semibold">Product Name</th>
+                      <th className="text-left pb-3 font-semibold">Price</th>
+                      <th className="text-left pb-3 font-semibold">Total Order</th>
+                      <th className="text-left pb-3 font-semibold">Total Amount</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {profile.orders.map((order, idx) => (
+                      <tr
+                        key={idx}
+                        className="border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors"
+                      >
+                        <td className="py-4 text-gray-500 font-medium">
+                          {order.trackingNo}
+                        </td>
+                        <td className="py-4 text-gray-900 font-bold">
+                          {order.productName}
+                        </td>
+                        <td className="py-4 text-gray-600">${order.price.toLocaleString()}</td>
+                        <td className="py-4">
+                          <span className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-bold">
+                            {order.totalOrder}
+                          </span>
+                        </td>
+                        <td className="py-4 text-gray-900 font-bold">
+                          ${order.totalAmount.toLocaleString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
 
-          {/* Right sub-column: Onboarding + Top Products — equal half width */}
-          <div className="flex flex-col gap-6 w-full md:w-1/2">
+          {/* Right sub-column: Onboarding + Top Products */}
+          <div className="flex flex-col gap-6 w-full lg:w-1/2">
             {/* Onboarding card */}
-            <div className="bg-white rounded-2xl">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-[14px] font-bold text-gray-900">
+            <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[15px] font-bold text-gray-900">
                   Onboarding steps
                 </span>
               </div>
 
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] text-gray-400">
-                  {/* {completedSteps} of {onboardingSteps.length} complete */}
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-gray-400 font-medium">
                   {onboardingSteps.filter((s) => s.done).length} of{" "}
                   {onboardingSteps.length} complete
                 </span>
                 <button
-                  // onClick={() => setShowOnboarding((prev) => !prev)}
                   onClick={toggleOnboarding}
-                  className="flex items-center gap-0.5 text-[11px] text-blue-500 hover:text-blue-600 bg-transparent border-none cursor-pointer p-0 transition-colors"
+                  className="flex items-center gap-0.5 text-xs font-bold text-blue-500 hover:text-blue-600 bg-transparent border-none cursor-pointer p-1 transition-colors"
                 >
                   {showOnboarding ? "Show less" : "Show more"}
                   <MdKeyboardArrowRight
-                    size={13}
+                    size={16}
                     style={{
                       transform: showOnboarding
                         ? "rotate(90deg)"
                         : "rotate(0deg)",
-                      transition: "transform 0.2s ease",
+                      transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                     }}
                   />
                 </button>
               </div>
 
+              {/* Progress bar */}
+              <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden mb-4">
+                <div 
+                  className="h-full bg-blue-500 transition-all duration-500" 
+                  style={{ width: `${(onboardingSteps.filter(s => s.done).length / onboardingSteps.length) * 100}%` }}
+                />
+              </div>
+
               {/* Dropdown steps */}
               <div
+                className="transition-all duration-300 ease-in-out"
                 style={{
-                  maxHeight: showOnboarding
-                    ? `${onboardingSteps.length * 36}px`
-                    : "0px",
+                  maxHeight: showOnboarding ? "500px" : "0px",
+                  opacity: showOnboarding ? 1 : 0,
                   overflow: "hidden",
-                  transition: "max-height 0.3s ease",
                 }}
               >
-                <div className="flex flex-col gap-2 pt-3">
+                <div className="flex flex-col gap-3 pt-2">
                   {onboardingSteps.map((step, i) => (
-                    <div key={i} className="flex items-center gap-2">
+                    <div key={i} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors">
                       {step.done ? (
                         <MdCheckCircle
-                          size={16}
-                          className="text-blue-500 shrink-0"
+                          size={18}
+                          className="text-green-500 shrink-0"
                         />
                       ) : (
                         <MdRadioButtonUnchecked
-                          size={16}
+                          size={18}
                           className="text-gray-300 shrink-0"
                         />
                       )}
                       <span
-                        className={`text-xs ${step.done ? "text-gray-700" : "text-gray-400"}`}
+                        className={`text-xs font-medium ${step.done ? "text-gray-700" : "text-gray-400"}`}
                       >
                         {step.label}
                       </span>
@@ -477,44 +584,51 @@ const Dashboard = () => {
             </div>
 
             {/* Top Products card */}
-            <div className="bg-white rounded-2xl">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-[14px] font-bold text-gray-900">
+            <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+              <div className="flex items-center justify-between mb-5">
+                <span className="text-[15px] font-bold text-gray-900">
                   Top Products
                 </span>
-                <button className="text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer p-0 flex">
-                  <MdMoreHoriz size={18} />
+                <button className="text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer p-1 rounded-full hover:bg-gray-50 transition-colors">
+                  <MdMoreHoriz size={20} />
                 </button>
               </div>
 
               {profile.topProducts.length === 0 ? (
-                <div className="flex flex-col items-center justify-center gap-2.5 py-8 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                  <MdShoppingBag size={36} className="text-gray-300" />
-                  <p className="text-[11px] text-gray-400 text-center">
+                <div className="flex flex-col items-center justify-center gap-4 py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                  <div className="w-14 h-14 bg-white rounded-2xl shadow-sm flex items-center justify-center">
+                    <MdShoppingBag size={28} className="text-amber-500" />
+                  </div>
+                  <p className="text-xs text-gray-400 font-medium text-center">
                     You have no top selling products yet.
                   </p>
                 </div>
               ) : (
-                <div className="flex flex-col gap-3">
-                  {profile.topProducts.map((product) => (
+                <div className="flex flex-col gap-4">
+                  {profile.topProducts.map((product, idx) => (
                     <div
-                      key={product.name}
-                      className="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 transition-colors"
+                      key={idx}
+                      className="flex items-center gap-4 p-3 rounded-2xl border border-gray-50 hover:border-blue-100 hover:bg-blue-50/30 transition-all group"
                     >
-                      <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center shrink-0">
-                        <MdShoppingBag size={20} className="text-gray-400" />
+                      <div className="w-12 h-12 bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                        <MdShoppingBag size={24} className="text-blue-500" />
                       </div>
                       <div className="flex flex-col flex-1 min-w-0">
-                        <span className="text-xs font-semibold text-gray-700 truncate">
+                        <span className="text-sm font-bold text-gray-900 truncate">
                           {product.name}
                         </span>
-                        <span className="text-[11px] text-yellow-400">
-                          {"★".repeat(product.rating)}
-                          {"☆".repeat(5 - product.rating)}
-                        </span>
+                        <div className="flex items-center gap-1 mt-0.5">
+                          {[...Array(5)].map((_, i) => (
+                            <MdStar 
+                              key={i} 
+                              size={12} 
+                              className={i < product.rating ? "text-amber-400" : "text-gray-200"} 
+                            />
+                          ))}
+                        </div>
                       </div>
-                      <span className="text-xs font-bold text-gray-800">
-                        ${product.price}
+                      <span className="text-sm font-bold text-gray-900">
+                        ${product.price.toLocaleString()}
                       </span>
                     </div>
                   ))}
@@ -524,14 +638,18 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-      {/* ── End Bigger Container ── */}
 
       {/* ── Chat FAB ── */}
-      <div className="fixed bottom-5 right-5 w-11 h-11 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center cursor-pointer shadow-lg">
-        <MdChat size={20} color="#fff" />
+      <div 
+        onClick={() => window.location.href = "/messages"}
+        className="fixed bottom-6 right-6 w-14 h-14 rounded-2xl bg-blue-600 flex items-center justify-center cursor-pointer shadow-xl hover:bg-blue-700 hover:-translate-y-1 transition-all z-40"
+      >
+        <MdChat size={24} color="#fff" />
+        <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 border-2 border-white rounded-full flex items-center justify-center text-[10px] font-bold text-white">1</span>
       </div>
     </div>
   );
 };
+
 
 export default Dashboard;

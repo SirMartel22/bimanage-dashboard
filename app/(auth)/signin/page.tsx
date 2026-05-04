@@ -52,7 +52,7 @@ const SignInPage = () => {
       if (data.token) {
         localStorage.setItem("token", data.token);
       }
-      
+
       if (data.user) {
         localStorage.setItem("user", JSON.stringify(data.user));
       }
@@ -159,7 +159,7 @@ const SignInPage = () => {
               href="/auth/forgot-password"
               className="text-sm text-blue-600 hover:text-blue-700 font-medium"
             >
-              Reset Password
+              Forgot Password
             </Link>
           </div>
 
