@@ -7,6 +7,7 @@ import { Eye, EyeOff } from "lucide-react";
 import PasswordValidation from "@/components/authflow/PasswordValidation";
 import Image from "next/image";
 import AuthLayout from "@/components/authflow/AuthLayout";
+import { useRegister, useGoogleLogin } from "@/api/auth/hooks";
 
 type SignUpFormState = {
   name: string;
@@ -18,7 +19,9 @@ type SignUpFormState = {
 };
 
 const SignUpPage = () => {
-  const router = useRouter();
+  const registerMutation = useRegister();
+  const googleLogin = useGoogleLogin();
+
   const [formData, setFormData] = useState<SignUpFormState>({
     name: "",
     username: "",
@@ -33,11 +36,9 @@ const SignUpPage = () => {
   const [passwordFocused, setPasswordFocused] = useState(false);
   const [confirmFocused, setConfirmFocused] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-  const handleGoogleLogin = () => {
-    window.location.href = "https://bimanage-backend.onrender.com/api/auth/google";
-  };
+  const isLoading = registerMutation.isPending;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -45,11 +46,19 @@ const SignUpPage = () => {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
   };
 
   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
+    setFieldErrors({});
 
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match.");
@@ -61,34 +70,15 @@ const SignUpPage = () => {
       return;
     }
 
-    setIsSubmitting(true);
-
     try {
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          username: formData.username,
-          email: formData.email,
-          password: formData.password,
-          confirmPassword: formData.confirmPassword,
-        }),
-        cache: "no-store",
+      await registerMutation.mutateAsync({
+        name: formData.name,
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
       });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || "Signup failed");
-      }
-      router.push("/success");
-    } catch (error) {
-      console.log(error);
-      setError(error instanceof Error ? error.message : "Something went wrong");
-    } finally {
-      setIsSubmitting(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
     }
   };
 
@@ -113,14 +103,8 @@ const SignUpPage = () => {
           onSubmit={handleSubmit}
           className="space-y-5 flex flex-col items-center justify-center py-8 px-8 lg:px-24 w-full"
         >
-          {/* Name Input */}
           <div className="w-full">
-            <label
-              htmlFor="name"
-              className="block text-sm lg:text-[16px] font-medium text text-gray-700 mb-2"
-            >
-              Full Name
-            </label>
+            <label htmlFor="name" className="block text-sm lg:text-[16px] font-medium text-gray-700 mb-2">Full Name</label>
             <input
               id="name"
               name="name"
@@ -129,18 +113,13 @@ const SignUpPage = () => {
               value={formData.name}
               onChange={handleChange}
               placeholder="Sammy Jackson"
-              className="w-full text-sm lg:text-[16px] px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all"
+              className={`w-full text-sm lg:text-[16px] px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all ${fieldErrors.name ? "border-red-500" : "border-gray-300"}`}
             />
+            {fieldErrors.name && <p className="text-red-500 text-xs mt-1">{fieldErrors.name}</p>}
           </div>
 
-          {/* Username input */}
           <div className="w-full">
-            <label
-              htmlFor="username"
-              className="block text-sm lg:text-[16px] font-medium text-gray-700 mb-2"
-            >
-              Username
-            </label>
+            <label htmlFor="username" className="block text-sm lg:text-[16px] font-medium text-gray-700 mb-2">Username</label>
             <input
               id="username"
               name="username"
@@ -149,18 +128,13 @@ const SignUpPage = () => {
               value={formData.username}
               onChange={handleChange}
               placeholder="simmexx"
-              className="w-full px-4 py-2 text-sm lg:text-[16px] border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all"
+              className={`w-full px-4 py-2 text-sm lg:text-[16px] border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all ${fieldErrors.username ? "border-red-500" : "border-gray-300"}`}
             />
+            {fieldErrors.username && <p className="text-red-500 text-xs mt-1">{fieldErrors.username}</p>}
           </div>
 
-          {/* Email Input */}
           <div className="w-full">
-            <label
-              htmlFor="email"
-              className="block text-sm lg:text-[16px] font-medium text-gray-700 mb-2"
-            >
-              Email
-            </label>
+            <label htmlFor="email" className="block text-sm lg:text-[16px] font-medium text-gray-700 mb-2">Email</label>
             <input
               id="email"
               name="email"
@@ -169,18 +143,13 @@ const SignUpPage = () => {
               value={formData.email}
               onChange={handleChange}
               placeholder="Sammyjackson12@gmail.com"
-              className="w-full px-4 py-2 text-sm lg:text-[16px] border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all"
+              className={`w-full px-4 py-2 text-sm lg:text-[16px] border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all ${fieldErrors.email ? "border-red-500" : "border-gray-300"}`}
             />
+            {fieldErrors.email && <p className="text-red-500 text-xs mt-1">{fieldErrors.email}</p>}
           </div>
 
-          {/* Password Input */}
           <div className="w-full">
-            <label
-              htmlFor="password"
-              className="block text-sm lg:text-[16px] font-medium text-gray-700 mb-2"
-            >
-              Password
-            </label>
+            <label htmlFor="password" title="Password must be at least 8 characters" className="block text-sm lg:text-[16px] font-medium text-gray-700 mb-2 cursor-help">Password</label>
             <div className="relative">
               <input
                 id="password"
@@ -190,28 +159,18 @@ const SignUpPage = () => {
                 value={formData.password}
                 onChange={handleChange}
                 onFocus={() => setPasswordFocused(true)}
-                placeholder="Min.8 c haracters"
+                placeholder="Min.8 characters"
                 className="w-full px-4 py-2 text-sm lg:text-[16px] border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all pr-12"
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-              >
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
             {passwordFocused && <PasswordValidation password={formData.password} />}
           </div>
 
-          {/* Confirm Password Input */}
           <div className="w-full">
-            <label
-              htmlFor="confirm-password"
-              className="block text-sm lg:text-[16px] font-medium text-gray-700 mb-2"
-            >
-              Confirm Password
-            </label>
+            <label htmlFor="confirmPassword" title="Passwords must match" className="block text-sm lg:text-[16px] font-medium text-gray-700 mb-2 cursor-help">Confirm Password</label>
             <div className="relative">
               <input
                 id="confirmPassword"
@@ -222,96 +181,50 @@ const SignUpPage = () => {
                 onChange={handleChange}
                 onFocus={() => setConfirmFocused(true)}
                 placeholder="Confirm your password"
-                className="w-full px-4 py-2 text-sm lg:text-[16px] border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all pr-12"
+                className={`w-full px-4 py-2 text-sm lg:text-[16px] border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all pr-12 ${fieldErrors.confirmPassword ? "border-red-500" : "border-gray-300"}`}
               />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-              >
+              <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
                 {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
-            {confirmFocused && (
-              <PasswordValidation 
-                password={formData.password} 
-                confirmPassword={formData.confirmPassword} 
-              />
-            )}
+            {confirmFocused && <PasswordValidation password={formData.password} confirmPassword={formData.confirmPassword} />}
             <div className="my-4 lg:my-3 flex items-center justify-center gap-1 text-sm lg:text-lg">
-              <input
-                type="checkbox"
-                name="acceptedTerms"
-                checked={formData.acceptedTerms}
-                onChange={handleChange}
-              />
+              <input type="checkbox" name="acceptedTerms" checked={formData.acceptedTerms} onChange={handleChange} />
               <p>I agree to Terms & Conditions</p>
             </div>
           </div>
 
-          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+          {error && (
+            <div className="w-full bg-red-50 border border-red-200 rounded-lg p-3">
+              <p className="text-red-700 text-sm text-center">{error}</p>
+            </div>
+          )}
 
-          {/* Submit Button */}
           <button
             type="submit"
-            disabled={isSubmitting}
-            className="w-[90%] lg:w-1/2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-sm"
+            disabled={isLoading}
+            className="w-[90%] lg:w-1/2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-sm"
           >
-            {isSubmitting ? "Signing Up..." : "Sign Up"}
+            {isLoading ? "Signing Up..." : "Sign Up"}
           </button>
 
-          {/* Divider */}
           <div className="relative my-2">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white text-gray-500">
-                Or sign up with
-              </span>
-            </div>
+            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-300"></div></div>
+            <div className="relative flex justify-center text-sm"><span className="px-4 bg-white text-gray-500">Or sign up with</span></div>
           </div>
 
-          {/* Social Login Buttons */}
           <div className="flex gap-8">
-            <button
-              type="button"
-              onClick={handleGoogleLogin}
-              className=" flex items-center justify-center gap-3 px-4 lg:py-2 lg:px-12 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <Image
-                src="/illustrations/google-logo.svg"
-                width={100}
-                height={100}
-                alt="google-icon"
-              />
-
-              {/* <span className="text-gray-700 font-black">Google</span> */}
+            <button type="button" onClick={googleLogin} className="flex items-center justify-center gap-3 px-4 lg:py-2 lg:px-12 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+              <Image src="/illustrations/google-logo.svg" width={20} height={20} alt="google-icon" />
+              <span className="text-gray-700 font-medium">Google</span>
             </button>
-
-            <button
-              type="button"
-              className=" flex items-center justify-center gap-3 px-4 lg:py-2 lg:px-12 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <Image
-                src="/illustrations/apple-logo.PNG"
-                width={100}
-                height={100}
-                alt="apple icon"
-              />
-              {/* <span className="text-gray-700 font-black">Apple</span> */}
+            <button type="button" disabled className="flex items-center justify-center gap-3 px-4 lg:py-2 lg:px-12 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors opacity-50 cursor-not-allowed">
+              <Image src="/illustrations/apple-logo.PNG" width={20} height={20} alt="apple icon" />
             </button>
           </div>
 
-          {/* Sign In Link */}
           <p className="text-center text-gray-600 mt-2 text-sm lg:text-lg">
-            Already have an account?{" "}
-            <Link
-              href="/signin"
-              className="text-blue-600 hover:text-blue-700 font-medium"
-            >
-              Sign In
-            </Link>
+            Already have an account? <Link href="/signin" className="text-blue-600 hover:text-blue-700 font-medium">Sign In</Link>
           </p>
         </form>
       </div>

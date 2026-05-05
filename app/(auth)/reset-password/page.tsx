@@ -1,17 +1,14 @@
 "use client";
 
-// export const dynamic = "force-dynamic";
-
 import React, { useState } from "react";
-// import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 import PasswordValidation from "@/components/authflow/PasswordValidation";
 import { useRouter } from "next/navigation";
-// import AuthLayout from "@/components/auth/AuthLayout";
 import AuthLayout from "@/components/authflow/AuthLayout";
+import { useResetPassword } from "@/api/auth/hooks";
 
 export default function ResetPasswordPage() {
-  const router = useRouter();
+  const resetPasswordMutation = useResetPassword();
   const [formData, setFormData] = useState({
     password: "",
     confirmPassword: "",
@@ -21,11 +18,12 @@ export default function ResetPasswordPage() {
   const [passwordFocused, setPasswordFocused] = useState(false);
   const [confirmFocused, setConfirmFocused] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({
     password: "",
     confirmPassword: "",
   });
+
+  const isLoading = resetPasswordMutation.isPending;
 
   const validatePassword = (password: string) => {
     if (password.length < 8) {
@@ -75,36 +73,13 @@ export default function ResetPasswordPage() {
       return;
     }
 
-    setIsSubmitting(true);
-
     try {
-      const resetToken = localStorage.getItem("resetToken");
-      if (!resetToken) {
-        throw new Error("Reset token not found. Please verify your OTP again.");
-      }
-
-      const response = await fetch("/api/auth/reset-password", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${resetToken}`
-        },
-        body: JSON.stringify({ password: formData.password }),
+      await resetPasswordMutation.mutateAsync({
+        password: formData.password,
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Reset password failed");
-      }
-
-      // Success! Clear token and redirect
-      localStorage.removeItem("resetToken");
-      router.push("/success");
+      // Redirect is handled in the hook
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -205,11 +180,12 @@ export default function ResetPasswordPage() {
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={isSubmitting}
-            className="w-1/2 bg-[#085AD9] cursor-pointer hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-sm mb-8 mt-6 lg:mt-8"
+            disabled={isLoading}
+            className="w-1/2 bg-[#085AD9] hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-sm mb-8 mt-6 lg:mt-8"
           >
-            {isSubmitting ? "Resetting..." : "Reset Password"}
+            {isLoading ? "Resetting..." : "Reset Password"}
           </button>
+
         </form>
       </div>
     </div>

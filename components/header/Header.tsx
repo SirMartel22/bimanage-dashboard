@@ -1,9 +1,6 @@
-
 import Image from "next/image"
-
-
-
-
+import { useDashboard } from "@/app/(dashboard)/dashboard/useDashboard"
+import { useAuthStore } from "@/lib/store/auth-store";
 import {
   MdCopyAll,
   MdShare,
@@ -23,17 +20,23 @@ interface User {
 }
 
 interface HeaderProps {
-  user?: User | null;
+  user?: User | any | null;
 }
 
 const Header = ({ user: propUser }: HeaderProps) => {
-    const [user, setUser] = useState<User | null>(null);
-    const [copied, setCopied] = useState(false);
-    const url = "https://bimanage.com.ng";
+    const storeUser = useAuthStore((s) => s.user);
+    const [user, setUser] = useState<User | any | null>(null);
+    const {
+        url,
+        handleCopy,
+        copied
+    } = useDashboard();
 
     useEffect(() => {
         if (propUser) {
             setUser(propUser);
+        } else if (storeUser) {
+            setUser(storeUser);
         } else {
             // Try to get user from localStorage first for instant display
             const storedUser = localStorage.getItem("user");
@@ -45,24 +48,17 @@ const Header = ({ user: propUser }: HeaderProps) => {
                 }
             }
         }
-    }, [propUser]);
-
-    const handleCopy = () => {
-        navigator.clipboard.writeText(url);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-    };
+    }, [propUser, storeUser]);
 
     const getInitials = (name: string) => {
-        return name
-            .split(" ")
-            .map((n) => n[0])
-            .join("")
-            .toUpperCase()
-            .slice(0, 2);
+      if (!name) return "U";
+      return name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2);
     };
-
-
 
     const handleLogout = () => {
         localStorage.removeItem("token");
@@ -73,7 +69,7 @@ const Header = ({ user: propUser }: HeaderProps) => {
   return (
     <div>
             {/* ── Topbar ── */}
-            <header className="flex md:flex sticky top-0 z-30 bg-white flex items-center justify-around gap-2.5 px-6 py-4 md:py-8  border-b border-gray-100">
+            <header className="flex md:flex sticky top-0 z-30 bg-white items-center justify-around gap-2.5 px-6 py-4 md:py-8  border-b border-gray-100">
               <Image
                 src="/illustrations/bimanage-mobile-logo.png"
                 width={100}

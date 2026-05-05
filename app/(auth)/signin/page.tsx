@@ -1,68 +1,39 @@
 "use client";
 
-// export const dynamic = "force-dynamic";
-
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 import PasswordValidation from "@/components/authflow/PasswordValidation";
-// import AuthLayout from "@/components/auth/AuthLayout";
 import AuthLayout from "@/components/authflow/AuthLayout";
+import Image from "next/image";
+import { useLogin, useGoogleLogin } from "@/api/auth/hooks";
 
 const SignInPage = () => {
-  const router = useRouter();
+  const loginMutation = useLogin();
+  const googleLogin = useGoogleLogin();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleGoogleLogin = () => {
-    window.location.href = "https://bimanage-backend.onrender.com/api/auth/google";
-  };
+  const isLoading = loginMutation.isPending;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setIsSubmitting(true);
+    setError("");
 
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-        }),
+      await loginMutation.mutateAsync({
+        email: formData.email,
+        password: formData.password,
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Sign in failed");
-      }
-
-      // Store token
-      if (data.token) {
-        localStorage.setItem("token", data.token);
-      }
-
-      if (data.user) {
-        localStorage.setItem("user", JSON.stringify(data.user));
-      }
-
-      // Redirect to dashboard
-      router.push("/dashboard");
+      // Redirect is handled in the hook
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
-      setIsSubmitting(false);
+      setError(err instanceof Error ? err.message : "Login failed");
     }
   };
 
@@ -168,23 +139,52 @@ const SignInPage = () => {
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isLoading}
             className="w-[90%] lg:w-1/2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-sm"
           >
-            {isSubmitting ? "Signing In..." : "Sign In"}
+            {isLoading ? "Signing In..." : "Sign In"}
           </button>
-
-          {/* Sign Up Link */}
-          <p className="text-center text-gray-600 mt-6">
-            Don&apos;t have an account?{" "}
-            <Link
-              href="/signup"
-              className="text-blue-600 hover:text-blue-700 font-medium"
-            >
-              Sign Up
-            </Link>
-          </p>
         </form>
+
+        {/* Sign Up Link */}
+        <p className="text-center text-gray-600 mt-6">
+          Don&apos;t have an account?{" "}
+          <Link
+            href="/signup"
+            className="text-blue-600 hover:text-blue-700 font-medium"
+          >
+            Sign Up
+          </Link>
+        </p>
+
+        {/* Divider */}
+        <div className="relative my-2">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-300"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-4 bg-white text-gray-500">
+              Or sign in with
+            </span>
+          </div>
+        </div>
+
+        {/* Social Login Buttons */}
+        <div className="flex gap-8 justify-center">
+          <button
+            type="button"
+            onClick={googleLogin}
+            className="flex items-center justify-center gap-3 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            <Image
+              src="/illustrations/google-logo.svg"
+              width={20}
+              height={20}
+              alt="google-icon"
+            />
+            <span className="text-gray-700 font-medium">Google</span>
+          </button>
+        </div>
       </div>
     </div>
   );

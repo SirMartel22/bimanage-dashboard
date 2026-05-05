@@ -7,16 +7,26 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 // import AuthLayout from "@/components/auth/AuthLayout";
 import AuthLayout from "@/components/authflow/AuthLayout";
+import { useRouter } from "next/navigation";
+import { useForgotPassword } from "@/api/auth/hooks";
 
 export default function ForgotPasswordPage() {
+  const router = useRouter();
+  const forgotPasswordMutation = useForgotPassword();
   const [email, setEmail] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const isLoading = forgotPasswordMutation.isPending;
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    //Handle forgot password logic
-    console.log("Reset password for:", email);
-    setIsSubmitted(true);
+
+    try {
+      await forgotPasswordMutation.mutateAsync({ email });
+      setIsSubmitted(true);
+    } catch (err) {
+      // Error is handled by the hook (sonner toast)
+    }
   };
 
   return (
@@ -61,10 +71,12 @@ export default function ForgotPasswordPage() {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-1/2 bg-[#085AD9] cursor-pointer hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-sm mb-8"
+              disabled={isLoading}
+              className="w-1/2 bg-[#085AD9] hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-sm mb-8"
             >
-              Submit
+              {isLoading ? "Sending..." : "Submit"}
             </button>
+
 
             {/* Info Text */}
             <p className="text-sm text-gray-600 text-center mt-4">
