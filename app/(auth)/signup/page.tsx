@@ -1,62 +1,74 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
+import PasswordValidation from "@/components/authflow/PasswordValidation";
 import Image from "next/image";
 import AuthLayout from "@/components/authflow/AuthLayout";
-import { useRouter } from "next/navigation";
 import { useRegister, useGoogleLogin } from "@/api/auth/hooks";
+
+type SignUpFormState = {
+  name: string;
+  username: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  acceptedTerms: boolean;
+};
 
 const SignUpPage = () => {
   const router = useRouter();
   const registerMutation = useRegister();
   const googleLogin = useGoogleLogin();
-  const [formData, setFormData] = useState({
+  
+  const [formData, setFormData] = useState<SignUpFormState>({
     name: "",
     username: "",
     email: "",
     password: "",
     confirmPassword: "",
+    acceptedTerms: false,
   });
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [agreeTerms, setAgreeTerms] = useState(false);
-  const [error, setError] = useState("");
+  const [passwordFocused, setPasswordFocused] = useState(false);
+  const [confirmFocused, setConfirmFocused] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-  const isLoading = registerMutation.isPending;
+  const isSubmitting = registerMutation.isPending;
 
-  const validateForm = () => {
-    const errors: Record<string, string> = {};
-
-    if (!formData.name.trim()) errors.name = "Full name is required";
-    if (!formData.username.trim()) errors.username = "Username is required";
-    if (!formData.email.trim()) errors.email = "Email is required";
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
-      errors.email = "Invalid email format";
-    if (formData.password.length < 8)
-      errors.password = "Password must be at least 8 characters";
-    if (!/(?=.*[a-z])/.test(formData.password))
-      errors.password = "Password must contain lowercase letters";
-    if (!/(?=.*[A-Z])/.test(formData.password))
-      errors.password = "Password must contain uppercase letters";
-    if (!/(?=.*\d)/.test(formData.password))
-      errors.password = "Password must contain numbers";
-    if (formData.password !== formData.confirmPassword)
-      errors.confirmPassword = "Passwords do not match";
-    if (!agreeTerms) errors.terms = "You must agree to the terms and conditions";
-
-    setFieldErrors(errors);
-    return Object.keys(errors).length === 0;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+    // Clear field error on change
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError("");
+    setError(null);
     setFieldErrors({});
 
-    if (!validateForm()) {
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    if (!formData.acceptedTerms) {
+      setError("You must agree to the Terms & Conditions.");
       return;
     }
 
@@ -67,25 +79,9 @@ const SignUpPage = () => {
         email: formData.email,
         password: formData.password,
       });
-      // Success redirect is handled in the hook's onSuccess
+      // Redirect to OTP verification is handled in the hook
     } catch (err) {
-      // Error toast is already shown by the hook, but we can set local error if we want
-      setError(err instanceof Error ? err.message : "Registration failed");
-    }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-    // Clear field error when user starts typing
-    if (fieldErrors[name]) {
-      setFieldErrors({
-        ...fieldErrors,
-        [name]: "",
-      });
+      setError(err instanceof Error ? err.message : "Something went wrong");
     }
   };
 
@@ -114,7 +110,7 @@ const SignUpPage = () => {
           <div className="w-full">
             <label
               htmlFor="name"
-              className="block text-sm lg:text-[16px] font-medium text text-gray-700 mb-2"
+              className="block text-sm lg:text-[16px] font-medium text-gray-700 mb-2"
             >
               Full Name
             </label>
@@ -126,37 +122,10 @@ const SignUpPage = () => {
               value={formData.name}
               onChange={handleChange}
               placeholder="Sammy Jackson"
-              className={`w-full text-sm lg:text-[16px] px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all ${
-                fieldErrors.name ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full text-sm lg:text-[16px] px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all ${fieldErrors.name ? "border-red-500" : "border-gray-300"}`}
             />
             {fieldErrors.name && (
               <p className="text-red-500 text-xs mt-1">{fieldErrors.name}</p>
-            )}
-          </div>
-
-          {/* Email Input */}
-          <div className="w-full">
-            <label
-              htmlFor="email"
-              className="block text-sm lg:text-[16px] font-medium text-gray-700 mb-2"
-            >
-              Email
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Sammyjackson12@gmail.com"
-              className={`w-full px-4 py-2 text-sm lg:text-[16px] border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all ${
-                fieldErrors.email ? "border-red-500" : "border-gray-300"
-              }`}
-            />
-            {fieldErrors.email && (
-              <p className="text-red-500 text-xs mt-1">{fieldErrors.email}</p>
             )}
           </div>
 
@@ -176,12 +145,33 @@ const SignUpPage = () => {
               value={formData.username}
               onChange={handleChange}
               placeholder="simmexx"
-              className={`w-full px-4 py-2 text-sm lg:text-[16px] border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all ${
-                fieldErrors.username ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full px-4 py-2 text-sm lg:text-[16px] border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all ${fieldErrors.username ? "border-red-500" : "border-gray-300"}`}
             />
             {fieldErrors.username && (
               <p className="text-red-500 text-xs mt-1">{fieldErrors.username}</p>
+            )}
+          </div>
+
+          {/* Email Input */}
+          <div className="w-full">
+            <label
+              htmlFor="email"
+              className="block text-sm lg:text-[16px] font-medium text-gray-700 mb-2"
+            >
+              Email
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              required
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Sammyjackson12@gmail.com"
+              className={`w-full px-4 py-2 text-sm lg:text-[16px] border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all ${fieldErrors.email ? "border-red-500" : "border-gray-300"}`}
+            />
+            {fieldErrors.email && (
+              <p className="text-red-500 text-xs mt-1">{fieldErrors.email}</p>
             )}
           </div>
 
@@ -201,10 +191,9 @@ const SignUpPage = () => {
                 required
                 value={formData.password}
                 onChange={handleChange}
-                placeholder="Min. 8 characters"
-                className={`w-full px-4 py-2 text-sm lg:text-[16px] border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all pr-12 ${
-                  fieldErrors.password ? "border-red-500" : "border-gray-300"
-                }`}
+                onFocus={() => setPasswordFocused(true)}
+                placeholder="Min.8 characters"
+                className="w-full px-4 py-2 text-sm lg:text-[16px] border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all pr-12"
               />
               <button
                 type="button"
@@ -214,31 +203,28 @@ const SignUpPage = () => {
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
-            {fieldErrors.password && (
-              <p className="text-red-500 text-xs mt-1">{fieldErrors.password}</p>
-            )}
+            {passwordFocused && <PasswordValidation password={formData.password} />}
           </div>
 
           {/* Confirm Password Input */}
           <div className="w-full">
             <label
-              htmlFor="confirm-password"
+              htmlFor="confirmPassword"
               className="block text-sm lg:text-[16px] font-medium text-gray-700 mb-2"
             >
               Confirm Password
             </label>
             <div className="relative">
               <input
-                id="confirm-password"
+                id="confirmPassword"
                 name="confirmPassword"
                 type={showConfirmPassword ? "text" : "password"}
                 required
                 value={formData.confirmPassword}
                 onChange={handleChange}
+                onFocus={() => setConfirmFocused(true)}
                 placeholder="Confirm your password"
-                className={`w-full px-4 py-2 text-sm lg:text-[16px] border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all pr-12 ${
-                  fieldErrors.confirmPassword ? "border-red-500" : "border-gray-300"
-                }`}
+                className={`w-full px-4 py-2 text-sm lg:text-[16px] border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all pr-12 ${fieldErrors.confirmPassword ? "border-red-500" : "border-gray-300"}`}
               />
               <button
                 type="button"
@@ -248,42 +234,37 @@ const SignUpPage = () => {
                 {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
-            {fieldErrors.confirmPassword && (
-              <p className="text-red-500 text-xs mt-1">{fieldErrors.confirmPassword}</p>
+            {confirmFocused && (
+              <PasswordValidation
+                password={formData.password}
+                confirmPassword={formData.confirmPassword}
+              />
             )}
+            <div className="my-4 lg:my-3 flex items-center justify-center gap-1 text-sm lg:text-lg">
+              <input
+                type="checkbox"
+                name="acceptedTerms"
+                checked={formData.acceptedTerms}
+                onChange={handleChange}
+              />
+              <p>I agree to Terms & Conditions</p>
+            </div>
           </div>
 
-          {/* Terms & Conditions */}
-          <div className="my-4 lg:my-3 flex items-center justify-center gap-2 text-sm lg:text-lg">
-            <input
-              type="checkbox"
-              id="terms"
-              checked={agreeTerms}
-              onChange={(e) => setAgreeTerms(e.target.checked)}
-              className="w-4 h-4 text-blue-600 rounded"
-            />
-            <label htmlFor="terms" className="text-gray-700">
-              I agree to Terms & Conditions
-            </label>
-          </div>
-          {fieldErrors.terms && (
-            <p className="text-red-500 text-xs text-center">{fieldErrors.terms}</p>
+          {error && (
+            <div className="w-full bg-red-50 border border-red-200 rounded-lg p-3">
+              <p className="text-red-700 text-sm text-center">{error}</p>
+            </div>
           )}
 
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={isSubmitting}
             className="w-[90%] lg:w-1/2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-sm"
           >
-            {isLoading ? "Signing Up..." : "Sign Up"}
+            {isSubmitting ? "Signing Up..." : "Sign Up"}
           </button>
-
-          {error && (
-            <div className="w-full bg-red-50 border border-red-200 rounded-lg p-3">
-              <p className="text-red-700 text-sm">{error}</p>
-            </div>
-          )}
 
           {/* Divider */}
           <div className="relative my-2">

@@ -1,11 +1,10 @@
 "use client";
 
-// export const dynamic = "force-dynamic";
-
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
-// import AuthLayout from "@/components/auth/AuthLayout";
+import PasswordValidation from "@/components/authflow/PasswordValidation";
 import AuthLayout from "@/components/authflow/AuthLayout";
 import Image from "next/image";
 import { useLogin, useGoogleLogin } from "@/api/auth/hooks";
@@ -18,6 +17,7 @@ const SignInPage = () => {
     password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
   const [error, setError] = useState("");
 
   const isLoading = loginMutation.isPending;
@@ -102,6 +102,7 @@ const SignInPage = () => {
                 required
                 value={formData.password}
                 onChange={handleChange}
+                onFocus={() => setPasswordFocused(true)}
                 placeholder="Enter your password"
                 className="w-full text-sm lg:text-[16px] px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all pr-12"
               />
@@ -113,6 +114,7 @@ const SignInPage = () => {
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
+            {passwordFocused && <PasswordValidation password={formData.password} />}
           </div>
 
           {/* Remember Me & Forgot Password */}
@@ -128,9 +130,11 @@ const SignInPage = () => {
               href="/auth/forgot-password"
               className="text-sm text-blue-600 hover:text-blue-700 font-medium"
             >
-              Reset Password
+              Forgot Password
             </Link>
           </div>
+
+          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
           {/* Submit Button */}
           <button
@@ -140,10 +144,6 @@ const SignInPage = () => {
           >
             {isLoading ? "Signing In..." : "Sign In"}
           </button>
-
-          {error && (
-            <p className="text-red-500 text-sm text-center">{error}</p>
-          )}
         </form>
 
         {/* Sign Up Link */}
