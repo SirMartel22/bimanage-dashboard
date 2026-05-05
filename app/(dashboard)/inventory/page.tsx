@@ -8,12 +8,12 @@ import { FiFilter } from "react-icons/fi";
 import { HiOutlineShoppingBag } from "react-icons/hi";
 import { MdOutlineAddCircleOutline, MdMoreHoriz } from "react-icons/md";
 import Header from "@/components/header/Header";
-import { 
-  AreaChart, 
-  Area, 
-  ResponsiveContainer, 
-  XAxis, 
-  YAxis, 
+import {
+  AreaChart,
+  Area,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
   Tooltip,
   CartesianGrid
 } from "recharts";
@@ -22,13 +22,13 @@ import { BsBoxSeam } from "react-icons/bs";
 const ClipboardIllustration = () => (
   <div className="relative w-32 h-32 flex items-center justify-center">
     <svg width="84" height="106" viewBox="0 0 84 106" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="7" y="11" width="70" height="88" rx="4" fill="white" stroke="#F1F5F9" strokeWidth="2"/>
-      <rect x="14" y="28" width="56" height="2" rx="1" fill="#F1F5F9"/>
-      <rect x="14" y="38" width="56" height="2" rx="1" fill="#F1F5F9"/>
-      <rect x="14" y="48" width="36" height="2" rx="1" fill="#F1F5F9"/>
-      <path d="M28 0H56V11H28V0Z" fill="#1E3A5F"/>
-      <circle cx="42" cy="5" r="2" fill="white"/>
-      <rect x="0" y="20" width="70" height="86" rx="4" fill="white" stroke="#E2E8F0" strokeWidth="1" strokeDasharray="4 4"/>
+      <rect x="7" y="11" width="70" height="88" rx="4" fill="white" stroke="#F1F5F9" strokeWidth="2" />
+      <rect x="14" y="28" width="56" height="2" rx="1" fill="#F1F5F9" />
+      <rect x="14" y="38" width="56" height="2" rx="1" fill="#F1F5F9" />
+      <rect x="14" y="48" width="36" height="2" rx="1" fill="#F1F5F9" />
+      <path d="M28 0H56V11H28V0Z" fill="#1E3A5F" />
+      <circle cx="42" cy="5" r="2" fill="white" />
+      <rect x="0" y="20" width="70" height="86" rx="4" fill="white" stroke="#E2E8F0" strokeWidth="1" strokeDasharray="4 4" />
     </svg>
   </div>
 );
@@ -75,9 +75,9 @@ const InventoryDashboard = () => {
   const isNewUser = products.length === 0 && stats.totalProducts === 0;
 
   // Provide fallback chart data
-  const chartData = !isNewUser && stats.productsByMonth.length > 0 
-    ? stats.productsByMonth.map(m => ({ name: m.name, v: m.value })) 
-    : [{name: "1", v:10},{name: "2", v:25},{name: "3", v:15},{name: "4", v:40},{name: "5", v:20},{name: "6", v:35},{name: "7", v:10}];
+  const chartData = !isNewUser && stats.productsByMonth.length > 0
+    ? stats.productsByMonth.map(m => ({ name: m.name, v: m.value }))
+    : [{ name: "1", v: 10 }, { name: "2", v: 25 }, { name: "3", v: 15 }, { name: "4", v: 40 }, { name: "5", v: 20 }, { name: "6", v: 35 }, { name: "7", v: 10 }];
 
   if (loading) {
     return (
@@ -94,10 +94,10 @@ const InventoryDashboard = () => {
 
       <main className="max-w-[1600px] mx-auto px-8 py-8">
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
-          
+
           {/* Left Column: Stats & Chart & Table (8 cols) */}
           <div className="xl:col-span-8 space-y-6">
-            
+
             {/* Top Stats */}
             <div className="flex gap-6">
               <div className="bg-white p-6 rounded-[24px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-50 flex items-center gap-4 flex-1">
@@ -125,35 +125,35 @@ const InventoryDashboard = () => {
 
             {/* Wave Chart Section */}
             <div className="bg-white rounded-[24px] shadow-sm border border-gray-100 p-8 min-h-[350px] flex items-center justify-center">
-               <div className="h-[280px] w-full" style={{ minWidth: '100%' }}>
+              <div className="h-[280px] w-full" style={{ minWidth: '100%' }}>
                 {isMounted ? (
                   <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                        <defs>
-                          <linearGradient id="colorWave" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                        <XAxis dataKey="name" hide />
-                        <YAxis hide />
-                        <Tooltip />
-                        <Area 
-                          type="monotone" 
-                          dataKey="v" 
-                          stroke="#3b82f6" 
-                          strokeWidth={4} 
-                          fillOpacity={1} 
-                          fill="url(#colorWave)" 
-                          animationDuration={1500}
-                        />
-                      </AreaChart>
+                    <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="colorWave" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                      <XAxis dataKey="name" hide />
+                      <YAxis hide />
+                      <Tooltip />
+                      <Area
+                        type="monotone"
+                        dataKey="v"
+                        stroke="#3b82f6"
+                        strokeWidth={4}
+                        fillOpacity={1}
+                        fill="url(#colorWave)"
+                        animationDuration={1500}
+                      />
+                    </AreaChart>
                   </ResponsiveContainer>
                 ) : (
                   <div className="w-full h-full bg-gray-50 animate-pulse rounded-xl" />
                 )}
-               </div>
+              </div>
             </div>
 
             {/* Product Sold Table */}
@@ -172,7 +172,7 @@ const InventoryDashboard = () => {
                   {isNewUser && (
                     <>
                       <p className="text-gray-400 text-xs mt-1 mb-8">You haven't add any product yet</p>
-                      <button 
+                      <button
                         onClick={() => setIsAddOpen(true)}
                         className="bg-[#1e3a5f] text-white px-10 py-3.5 rounded-xl font-bold text-sm hover:bg-[#2a4a7f] transition-all border-none cursor-pointer shadow-md active:scale-95"
                       >
@@ -183,39 +183,39 @@ const InventoryDashboard = () => {
                 </div>
               ) : (
                 <div className="overflow-x-auto">
-                   <table className="w-full text-left text-sm">
-                      <thead className="bg-gray-50/30 text-gray-400 font-bold text-[11px] uppercase tracking-wider">
-                         <tr>
-                            <th className="px-6 py-5">Product Name</th>
-                            <th className="px-6 py-5">Price</th>
-                            <th className="px-6 py-5">No sold</th>
-                            <th className="px-6 py-5">Stock</th>
-                            <th className="px-6 py-5">Total Amount</th>
-                         </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-50">
-                         {soldProducts.map((p: any, i: number) => (
-                           <tr key={i} className="hover:bg-gray-50/50 transition-colors">
-                              <td className="px-6 py-4">
-                                <div className="flex items-center gap-3">
-                                   <div className="w-10 h-10 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
-                                      {p.image ? <img src={p.image} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-400">📦</div>}
-                                   </div>
-                                   <span className="font-bold text-gray-800">{p.productName}</span>
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 font-bold text-gray-700">${p.price}</td>
-                              <td className="px-6 py-4 font-bold text-gray-700">{p.noSold}</td>
-                              <td className="px-6 py-4">
-                                <span className="bg-[#e0f2fe] text-[#0369a1] px-3 py-1 rounded-md font-bold text-xs">
-                                  {p.stock}
-                                </span>
-                              </td>
-                              <td className="px-6 py-4 font-bold text-gray-900">${p.totalAmount?.toLocaleString()}</td>
-                           </tr>
-                         ))}
-                      </tbody>
-                   </table>
+                  <table className="w-full text-left text-sm">
+                    <thead className="bg-gray-50/30 text-gray-400 font-bold text-[11px] uppercase tracking-wider">
+                      <tr>
+                        <th className="px-6 py-5">Product Name</th>
+                        <th className="px-6 py-5">Price</th>
+                        <th className="px-6 py-5">No sold</th>
+                        <th className="px-6 py-5">Stock</th>
+                        <th className="px-6 py-5">Total Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50">
+                      {soldProducts.map((p: any, i: number) => (
+                        <tr key={i} className="hover:bg-gray-50/50 transition-colors">
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
+                                {p.image ? <img src={p.image} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-400">📦</div>}
+                              </div>
+                              <span className="font-bold text-gray-800">{p.productName}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 font-bold text-gray-700">${p.price}</td>
+                          <td className="px-6 py-4 font-bold text-gray-700">{p.noSold}</td>
+                          <td className="px-6 py-4">
+                            <span className="bg-[#e0f2fe] text-[#0369a1] px-3 py-1 rounded-md font-bold text-xs">
+                              {p.stock}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 font-bold text-gray-900">${p.totalAmount?.toLocaleString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               )}
             </div>
@@ -223,7 +223,7 @@ const InventoryDashboard = () => {
 
           {/* Right Column: Stock Availability & Sidebar (4 cols) */}
           <div className="xl:col-span-4 space-y-6">
-            
+
             {/* Stock Availability Card */}
             <div className="bg-[#f8fafc] rounded-[24px] shadow-sm border border-gray-100 p-8">
               <div className="flex items-center justify-between mb-8">
@@ -235,7 +235,7 @@ const InventoryDashboard = () => {
                   <button className="w-9 h-9 rounded-lg bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
                     <FiFilter size={18} />
                   </button>
-                  <button 
+                  <button
                     onClick={() => setIsAddOpen(true)}
                     className="w-9 h-9 rounded-lg bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
                   >
@@ -250,18 +250,18 @@ const InventoryDashboard = () => {
               </div>
 
               <div className="flex items-center gap-4 mb-6">
-                 <div className="flex items-center gap-2">
-                   <span className="w-3 h-3 rounded-sm bg-[#10b981]" />
-                   <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Available</span>
-                 </div>
-                 <div className="flex items-center gap-2">
-                   <span className="w-3 h-3 rounded-sm bg-[#fbbf24]" />
-                   <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Low stock</span>
-                 </div>
-                 <div className="flex items-center gap-2">
-                   <span className="w-3 h-3 rounded-sm bg-[#f43f5e]" />
-                   <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">out of stock</span>
-                 </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-sm bg-[#10b981]" />
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Available</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-sm bg-[#fbbf24]" />
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Low stock</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-sm bg-[#f43f5e]" />
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">out of stock</span>
+                </div>
               </div>
 
               <div className="h-7 flex rounded-lg overflow-hidden mb-10 border-4 border-white shadow-sm bg-gray-100">
@@ -280,14 +280,14 @@ const InventoryDashboard = () => {
                   ) : (
                     stats.lowStockProducts.slice(0, 5).map((p: any, i: number) => (
                       <div key={i} className="flex items-center justify-between py-1">
-                         <div className="flex items-center gap-3">
-                           <span className="w-1 h-5 bg-[#fbbf24] rounded-full" />
-                           <span className="text-sm font-bold text-gray-700">{p.name}</span>
-                         </div>
-                         <div className="flex items-center gap-6">
-                            <span className="text-sm font-bold text-gray-900">{p.qty}</span>
-                            <span className="text-sm font-bold text-gray-400 min-w-[60px] text-right">{p.brand}</span>
-                         </div>
+                        <div className="flex items-center gap-3">
+                          <span className="w-1 h-5 bg-[#fbbf24] rounded-full" />
+                          <span className="text-sm font-bold text-gray-700">{p.name}</span>
+                        </div>
+                        <div className="flex items-center gap-6">
+                          <span className="text-sm font-bold text-gray-900">{p.qty}</span>
+                          <span className="text-sm font-bold text-gray-400 min-w-[60px] text-right">{p.brand}</span>
+                        </div>
                       </div>
                     ))
                   )
@@ -299,22 +299,22 @@ const InventoryDashboard = () => {
             {isNewUser ? (
               <div className="bg-white rounded-[24px] shadow-sm border border-gray-100 p-8 flex flex-col min-h-[350px]">
                 <div className="flex items-center justify-between mb-8">
-                   <h3 className="text-sm font-black text-gray-900">Onboarding steps</h3>
-                   <span className="text-[10px] font-bold text-gray-400">1 of 5 complete</span>
+                  <h3 className="text-sm font-black text-gray-900">Onboarding steps</h3>
+                  <span className="text-[10px] font-bold text-gray-400">1 of 5 complete</span>
                 </div>
                 <div className="h-1.5 bg-gray-50 rounded-full overflow-hidden mb-12">
-                   <div className="bg-[#1e3a5f] h-full w-1/5" />
+                  <div className="bg-[#1e3a5f] h-full w-1/5" />
                 </div>
                 <div className="flex-1 flex flex-col items-center justify-center">
-                   <ClipboardIllustration />
-                   <p className="text-[11px] font-bold text-gray-500 mt-4">You have no top selling products yet.</p>
+                  <ClipboardIllustration />
+                  <p className="text-[11px] font-bold text-gray-500 mt-4">You have no top selling products yet.</p>
                 </div>
               </div>
             ) : (
               <div className="bg-[#f8fafc] rounded-[24px] shadow-sm border border-gray-100 p-8">
                 <h3 className="text-lg font-black text-gray-900 mb-1">Product analytics</h3>
                 <p className="text-xs text-gray-400 font-bold mb-10">Manage your daily sales</p>
-                
+
                 <ul className="space-y-6 mb-12">
                   <li className="flex items-center gap-4">
                     <span className="w-2 h-2 rounded-full bg-gray-900" />
@@ -343,9 +343,9 @@ const InventoryDashboard = () => {
         </div>
       </main>
 
-      <AddProductSidebar 
-        isOpen={isAddOpen} 
-        onClose={handleCloseSidebar} 
+      <AddProductSidebar
+        isOpen={isAddOpen}
+        onClose={handleCloseSidebar}
         onSuccess={refreshData}
         product={editingProduct}
       />
