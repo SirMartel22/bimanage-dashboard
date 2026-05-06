@@ -42,12 +42,12 @@ const SignUpPage = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
+    setFormData((prev: SignUpFormState) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
     if (fieldErrors[name]) {
-      setFieldErrors((prev) => {
+      setFieldErrors((prev: Record<string, string>) => {
         const next = { ...prev };
         delete next[name];
         return next;
@@ -55,7 +55,7 @@ const SignUpPage = () => {
     }
   };
 
-  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     setFieldErrors({});
