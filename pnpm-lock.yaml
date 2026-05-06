@@ -38,12 +38,9 @@ importers:
       sonner:
         specifier: ^2.0.7
         version: 2.0.7(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-<<<<<<< HEAD
       zustand:
         specifier: ^5.0.12
         version: 5.0.12(@types/react@19.2.14)(immer@11.1.4)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
-=======
->>>>>>> a2ff25e841649759bf94e0d572a3a07c2ed6b98d
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4.1.18
