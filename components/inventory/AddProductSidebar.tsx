@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { MdClose, MdCloudUpload, MdDelete } from "react-icons/md";
+import { useAuthStore } from "@/lib/store/auth-store";
 
 interface AddProductSidebarProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ interface AddProductSidebarProps {
 const AddProductSidebar = ({ isOpen, onClose, onSuccess, product }: AddProductSidebarProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
+  const { token } = useAuthStore();
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
   
@@ -68,7 +70,7 @@ const AddProductSidebar = ({ isOpen, onClose, onSuccess, product }: AddProductSi
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const token = localStorage.getItem("token");
+    
     const isEdit = !!product;
     const url = isEdit ? `/api/inventory/products/${product._id}` : "/api/inventory/products";
     const method = isEdit ? "PUT" : "POST";

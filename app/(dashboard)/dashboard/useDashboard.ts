@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react"
 import { UserType, UserProfile, Order, TopProduct } from "./dashboard.types";
+import { useAuthStore } from "@/lib/store/auth-store";
 import { chartData as mockChartData, legendItems, onboardingSteps } from "./mockdata"
 
 export const useDashboard = () => {
@@ -8,6 +9,7 @@ export const useDashboard = () => {
     const [showOnboarding, setShowOnboarding] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const { token } = useAuthStore();
     
     const [profile, setProfile] = useState<UserProfile>({
         name: "",
@@ -31,10 +33,10 @@ export const useDashboard = () => {
         setLoading(true);
         setError(null);
 
-        const token = localStorage.getItem("token");
-        
         if (!token) {
-            setError("No authentication token found");
+            // Wait for hydration if needed, but if it's been some time and still no token, it's an error.
+            // Actually, SidebarLayout handles the redirect if no token.
+            // Here we just wait.
             setLoading(false);
             return;
         }
@@ -131,7 +133,7 @@ export const useDashboard = () => {
             isFetching.current = false;
         }
 
-    }, []);
+    }, [token]);
 
     useEffect(() => {
         fetchData();

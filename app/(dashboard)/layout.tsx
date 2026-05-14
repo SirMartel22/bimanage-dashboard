@@ -71,6 +71,16 @@ export default function SidebarLayout({ children }: SideBarLayoutProps) {
 
   useEffect(() => {
     const fetchUser = async () => {
+      // Ensure legacy localStorage keys are synced for backward compatibility (e.g. after refresh)
+      if (typeof window !== "undefined" && token) {
+        if (!localStorage.getItem("token")) {
+          localStorage.setItem("token", token);
+        }
+        if (user && !localStorage.getItem("user")) {
+          localStorage.setItem("user", JSON.stringify(user));
+        }
+      }
+
       // Check if we already have the token from the store (persisted)
       if (!token) {
         // If no token in store, try one more time to check localStorage directly just in case 

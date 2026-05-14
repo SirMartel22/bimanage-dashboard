@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react"
+import { useAuthStore } from "@/lib/store/auth-store";
 
 export interface InventoryStats {
   totalProducts: number;
@@ -26,6 +27,7 @@ export const useInventory = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [user, setUser] = useState<any>(null);
+    const { token } = useAuthStore();
     
     const [stats, setStats] = useState<InventoryStats>({
         totalProducts: 0,
@@ -48,10 +50,7 @@ export const useInventory = () => {
         
         setLoading(true);
         setError(null);
-        const token = localStorage.getItem("token");
-        
         if (!token) {
-            setError("No authentication token found");
             setLoading(false);
             isFetching.current = false;
             return;
@@ -132,7 +131,7 @@ export const useInventory = () => {
             setLoading(false);
             isFetching.current = false;
         }
-    }, [stats.totalProducts, soldProducts.length]);
+    }, [stats.totalProducts, soldProducts.length, token]);
 
     useEffect(() => {
         fetchData();
