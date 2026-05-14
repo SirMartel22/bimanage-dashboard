@@ -8,6 +8,7 @@ import PasswordValidation from "@/components/authflow/PasswordValidation";
 import Image from "next/image";
 import AuthLayout from "@/components/authflow/AuthLayout";
 import { useRegister, useGoogleLogin } from "@/api/auth/hooks";
+import { getErrorMessage } from "@/api/types";
 
 type SignUpFormState = {
   name: string;
@@ -72,13 +73,14 @@ const SignUpPage = () => {
 
     try {
       await registerMutation.mutateAsync({
-        name: formData.name,
-        username: formData.username,
-        email: formData.email,
+        name: formData.name.trim(),
+        username: formData.username.trim(),
+        email: formData.email.trim(),
         password: formData.password,
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      const apiError = getErrorMessage(err);
+      setError(apiError.message);
     }
   };
 

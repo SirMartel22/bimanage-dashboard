@@ -8,6 +8,7 @@ import PasswordValidation from "@/components/authflow/PasswordValidation";
 import AuthLayout from "@/components/authflow/AuthLayout";
 import Image from "next/image";
 import { useLogin, useGoogleLogin } from "@/api/auth/hooks";
+import { getErrorMessage } from "@/api/types";
 
 const SignInPage = () => {
   const loginMutation = useLogin();
@@ -28,12 +29,13 @@ const SignInPage = () => {
 
     try {
       await loginMutation.mutateAsync({
-        email: formData.email,
+        email: formData.email.trim(),
         password: formData.password,
       });
       // Redirect is handled in the hook
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
+      const apiError = getErrorMessage(err);
+      setError(apiError.message);
     }
   };
 

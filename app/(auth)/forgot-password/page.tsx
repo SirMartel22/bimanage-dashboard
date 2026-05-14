@@ -22,7 +22,7 @@ export default function ForgotPasswordPage() {
     e.preventDefault();
 
     try {
-      await forgotPasswordMutation.mutateAsync({ email });
+      await forgotPasswordMutation.mutateAsync({ email: email.trim() });
       setIsSubmitted(true);
     } catch (err) {
       // Error is handled by the hook (sonner toast)
