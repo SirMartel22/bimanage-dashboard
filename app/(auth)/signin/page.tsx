@@ -138,7 +138,7 @@ const SignInPage = () => {
 
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
-          {/* Submit Button */}
+          {/* Submit Button to submit the login form*/}
           <button
             type="submit"
             disabled={isLoading}
