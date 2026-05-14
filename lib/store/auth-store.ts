@@ -27,15 +27,28 @@ export const useAuthStore = create<AuthStore>()(
   persist(
     (set) => ({
       ...initialState,
-      setAuthFromLogin: (payload) =>
+      setAuthFromLogin: (payload) => {
+        if (typeof window !== "undefined") {
+          localStorage.setItem("token", payload.token);
+          if (payload.user) {
+            localStorage.setItem("user", JSON.stringify(payload.user));
+          }
+        }
         set({
           token: payload.token,
           user: payload.user || null,
           isAuthenticated: !!payload.token,
-        }),
+        });
+      },
       setUser: (user) => set({ user }),
       setToken: (token) => set({ token, isAuthenticated: !!token }),
-      clearAuth: () => set(initialState),
+      clearAuth: () => {
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+        }
+        set(initialState);
+      },
     }),
     {
       name: "bimanage_auth_store",

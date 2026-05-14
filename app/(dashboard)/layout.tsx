@@ -13,15 +13,10 @@ import {
   MdLogout,
 } from "react-icons/md";
 import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/lib/store/auth-store";
+import { useLogout } from "@/api/auth/hooks";
+import type { User } from "@/api/auth/types";
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  username?: string;
-  role?: string;
-  avatar?: string;
-}
 
 interface NavItem {
   label: string;
@@ -69,21 +64,30 @@ const navItems: NavItem[] = [
 export default function SidebarLayout({ children }: SideBarLayoutProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
+  const logout = useLogout();
+  
+  const { token, user, setUser, clearAuth } = useAuthStore();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUser = async () => {
-      const token = localStorage.getItem("token");
+      // Check if we already have the token from the store (persisted)
       if (!token) {
-        router.push("/signin");
-        return;
+        // If no token in store, try one more time to check localStorage directly just in case 
+        // or redirect immediately. Zustand persist usually handles this.
+        const rawToken = localStorage.getItem("token") || 
+                         JSON.parse(localStorage.getItem("bimanage_auth_store") || "{}")?.state?.token;
+        
+        if (!rawToken) {
+          router.push("/signin");
+          return;
+        }
       }
 
       try {
         const response = await fetch("/api/auth/me", {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${token || JSON.parse(localStorage.getItem("bimanage_auth_store") || "{}")?.state?.token}`,
           },
         });
 
@@ -95,7 +99,7 @@ export default function SidebarLayout({ children }: SideBarLayoutProps) {
         setUser(data.user);
       } catch (error) {
         console.error(error);
-        localStorage.removeItem("token");
+        clearAuth();
         router.push("/signin");
       } finally {
         setLoading(false);
@@ -103,12 +107,10 @@ export default function SidebarLayout({ children }: SideBarLayoutProps) {
     };
 
     fetchUser();
-  }, [router]);
+  }, [router, token, setUser, clearAuth]);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    router.push("/signin");
+    logout();
   };
 
   const getInitials = (name: string) => {
