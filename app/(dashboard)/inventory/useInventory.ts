@@ -137,6 +137,26 @@ export const useInventory = () => {
         fetchData();
     }, [fetchData]);
 
+    const deleteProduct = async (productId: string) => {
+        if (!token) return;
+        try {
+            const res = await fetch(`/api/inventory/products/${productId}`, {
+                method: "DELETE",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+            if (!res.ok) {
+                const errData = await res.json();
+                throw new Error(errData.message || "Failed to delete product");
+            }
+            await fetchData();
+        } catch (err: any) {
+            console.error("Delete product error:", err);
+            alert(err.message || "Failed to delete product");
+        }
+    };
+
     return {
         loading,
         error,
@@ -144,7 +164,8 @@ export const useInventory = () => {
         stats,
         products,
         soldProducts,
-        refreshData: fetchData
+        refreshData: fetchData,
+        deleteProduct
     };
 };
 

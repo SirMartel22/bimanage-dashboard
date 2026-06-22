@@ -78,6 +78,8 @@ export const useDashboard = () => {
 
             // Transform recent orders to match UI format
             const formattedOrders: Order[] = recentOrders.map((o: any) => ({
+                id: o._id,
+                status: o.status || "active",
                 trackingNo: o._id?.slice(-6).toUpperCase() || "#000000",
                 productName: o.productId?.name || "Unknown Product",
                 price: o.productId?.sellingPrice || 0,
@@ -139,6 +141,26 @@ export const useDashboard = () => {
         fetchData();
     }, [fetchData]);
 
+    const cancelOrder = async (orderId: string) => {
+        if (!token) return;
+        try {
+            const res = await fetch(`/api/orders/${orderId}/cancel`, {
+                method: "PUT",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+            if (!res.ok) {
+                const errData = await res.json();
+                throw new Error(errData.message || "Failed to cancel order");
+            }
+            await fetchData();
+        } catch (err: any) {
+            console.error("Cancel order error:", err);
+            alert(err.message || "Failed to cancel order");
+        }
+    };
+
     const handleCopy = () => {
         navigator.clipboard.writeText(url);
         setCopied(true);
@@ -156,7 +178,7 @@ export const useDashboard = () => {
         chartData, legendItems, onboardingSteps,
 
         // handlers
-        handleCopy, toggleOnboarding, toggleUserType, refreshData: fetchData
+        handleCopy, toggleOnboarding, toggleUserType, refreshData: fetchData, cancelOrder
     };
 };
 
