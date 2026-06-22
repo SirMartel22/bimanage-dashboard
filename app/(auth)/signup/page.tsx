@@ -220,9 +220,6 @@ const SignUpPage = () => {
               <Image src="/illustrations/google-logo.svg" width={20} height={20} alt="google-icon" />
               <span className="text-gray-700 font-medium">Google</span>
             </button>
-            <button type="button" disabled className="flex items-center justify-center gap-3 px-4 lg:py-2 lg:px-12 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors opacity-50 cursor-not-allowed">
-              <Image src="/illustrations/apple-logo.PNG" width={20} height={20} alt="apple icon" />
-            </button>
           </div>
 
           <p className="text-center text-gray-600 mt-2 text-sm lg:text-lg">
