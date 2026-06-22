@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import AuthLayout from "@/components/authflow/AuthLayout";
 import { useVerifyEmail, useVerifyOtp, useResendOtp } from "@/api/auth/hooks";
+import { getErrorMessage } from "@/api/types";
 
 function VerifyOtpContent() {
   const searchParams = useSearchParams();
@@ -76,7 +77,8 @@ function VerifyOtpContent() {
           await verifyOtpMutation.mutateAsync({ email, otp: otpCode });
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Something went wrong");
+        const apiError = getErrorMessage(err);
+        setError(apiError.message);
       }
     }
   };

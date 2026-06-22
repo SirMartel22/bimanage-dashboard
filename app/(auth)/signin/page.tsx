@@ -8,6 +8,7 @@ import PasswordValidation from "@/components/authflow/PasswordValidation";
 import AuthLayout from "@/components/authflow/AuthLayout";
 import Image from "next/image";
 import { useLogin, useGoogleLogin } from "@/api/auth/hooks";
+import { getErrorMessage } from "@/api/types";
 
 const SignInPage = () => {
   const loginMutation = useLogin();
@@ -28,12 +29,13 @@ const SignInPage = () => {
 
     try {
       await loginMutation.mutateAsync({
-        email: formData.email,
+        email: formData.email.trim(),
         password: formData.password,
       });
       // Redirect is handled in the hook
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
+      const apiError = getErrorMessage(err);
+      setError(apiError.message);
     }
   };
 
@@ -127,7 +129,7 @@ const SignInPage = () => {
               <span className="ml-2 text-sm text-gray-600">Remember me</span>
             </label>
             <Link
-              href="/auth/forgot-password"
+              href="/forgot-password"
               className="text-sm text-blue-600 hover:text-blue-700 font-medium"
             >
               Forgot Password
@@ -136,7 +138,7 @@ const SignInPage = () => {
 
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
-          {/* Submit Button */}
+          {/* Submit Button to submit the login form*/}
           <button
             type="submit"
             disabled={isLoading}

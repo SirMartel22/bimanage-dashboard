@@ -58,19 +58,22 @@ export function isValidationError(error: unknown): error is ValidationError {
 }
 
 export function getErrorMessage(error: any): { title: string; message: string } {
-  if (isSimpleError(error)) {
+  // Handle Axios error structure
+  const data = error?.response?.data || error;
+
+  if (isSimpleError(data)) {
     return {
       title: 'Error',
-      message: error.message || error.detail || 'Unknown error'
+      message: data.message || data.detail || 'Unknown error'
     }
   }
 
-  if (isValidationError(error)) {
+  if (isValidationError(data)) {
     return {
       title: 'Validation Error',
-      message: error.detail.map(item => item.msg).join(', ')
+      message: data.detail.map(item => item.msg).join(', ')
     }
   }
 
-  return { title: 'Error', message: error?.message || 'Unknown error occurred' }
+  return { title: 'Error', message: data?.message || error?.message || 'Unknown error occurred' }
 }

@@ -168,7 +168,8 @@ const Dashboard = () => {
     toggleUserType,
     loading,
     error,
-    user
+    user,
+    cancelOrder
   } = useDashboard();
 
   const [userName, setUserName] = useState<string>("User");
@@ -478,6 +479,8 @@ const Dashboard = () => {
                       <th className="text-left pb-3 font-semibold">Price</th>
                       <th className="text-left pb-3 font-semibold">Total Order</th>
                       <th className="text-left pb-3 font-semibold">Total Amount</th>
+                      <th className="text-left pb-3 font-semibold">Status</th>
+                      <th className="text-center pb-3 font-semibold">Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -500,6 +503,31 @@ const Dashboard = () => {
                         </td>
                         <td className="py-4 text-gray-900 font-bold">
                           ${order.totalAmount.toLocaleString()}
+                        </td>
+                        <td className="py-4">
+                          <span className={`px-2.5 py-1 rounded-md font-bold text-[9px] uppercase tracking-wider ${
+                            order.status === "cancelled" 
+                              ? "bg-red-50 text-red-500 border border-red-100" 
+                              : "bg-green-50 text-green-600 border border-green-100"
+                          }`}>
+                            {order.status || "active"}
+                          </span>
+                        </td>
+                        <td className="py-4 text-center">
+                          {order.status !== "cancelled" && order.id ? (
+                            <button
+                              onClick={() => {
+                                if (confirm(`Are you sure you want to cancel order ${order.trackingNo}?`)) {
+                                  cancelOrder(order.id!);
+                                }
+                              }}
+                              className="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 hover:border-red-300 text-[10px] font-bold rounded-lg transition-all cursor-pointer active:scale-95 shadow-sm"
+                            >
+                              Cancel
+                            </button>
+                          ) : (
+                            <span className="text-gray-300 text-[10px] font-bold">-</span>
+                          )}
                         </td>
                       </tr>
                     ))}

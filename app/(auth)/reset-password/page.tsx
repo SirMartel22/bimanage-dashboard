@@ -6,6 +6,7 @@ import PasswordValidation from "@/components/authflow/PasswordValidation";
 import { useRouter } from "next/navigation";
 import AuthLayout from "@/components/authflow/AuthLayout";
 import { useResetPassword } from "@/api/auth/hooks";
+import { getErrorMessage } from "@/api/types";
 
 export default function ResetPasswordPage() {
   const resetPasswordMutation = useResetPassword();
@@ -79,7 +80,8 @@ export default function ResetPasswordPage() {
       });
       // Redirect is handled in the hook
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      const apiError = getErrorMessage(err);
+      setError(apiError.message);
     }
   };
 

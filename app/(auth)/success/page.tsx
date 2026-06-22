@@ -8,11 +8,7 @@ export default function SuccessPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Optional: Auto-redirect to sign in after 5 seconds
-    // const timer = setTimeout(() => {
-    //   router.push("/auth/signin");
-    // }, 5000);
-    // return () => clearTimeout(timer);
+    // Optional: Auto-redirect logic can be added here if needed
   }, [router]);
 
   return (

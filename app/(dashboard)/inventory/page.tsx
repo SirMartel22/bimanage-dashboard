@@ -4,6 +4,8 @@ import { useInventory } from "./useInventory";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import AddProductSidebar from "@/components/inventory/AddProductSidebar";
+import StockInModal from "@/components/inventory/StockInModal";
+import SellProductModal from "@/components/inventory/SellProductModal";
 import { FiFilter } from "react-icons/fi";
 import { HiOutlineShoppingBag } from "react-icons/hi";
 import { MdOutlineAddCircleOutline, MdMoreHoriz } from "react-icons/md";
@@ -41,7 +43,8 @@ const InventoryDashboard = () => {
     stats,
     products,
     refreshData,
-    soldProducts
+    soldProducts,
+    deleteProduct
   } = useInventory();
 
   const searchParams = useSearchParams();
@@ -49,10 +52,23 @@ const InventoryDashboard = () => {
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [isMounted, setIsMounted] = useState(false);
 
+  const [activeTab, setActiveTab] = useState<"all" | "sold">("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isStockInOpen, setIsStockInOpen] = useState(false);
+  const [isSellOpen, setIsSellOpen] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState<string | undefined>(undefined);
+
   useEffect(() => {
     setIsMounted(true);
-    if (searchParams.get("action") === "add") {
+    const action = searchParams.get("action");
+    if (action === "add") {
       setIsAddOpen(true);
+    } else if (action === "stock-in") {
+      setSelectedProductId(undefined);
+      setIsStockInOpen(true);
+    } else if (action === "sell") {
+      setSelectedProductId(undefined);
+      setIsSellOpen(true);
     }
   }, [searchParams]);
 
@@ -156,67 +172,222 @@ const InventoryDashboard = () => {
               </div>
             </div>
 
-            {/* Product Sold Table */}
+            {/* Tabbed Products View */}
             <div className="bg-white rounded-[24px] shadow-[0_4px_30px_rgba(0,0,0,0.02)] border border-gray-50 overflow-hidden min-h-[450px] flex flex-col">
               <div className="p-6 border-b border-gray-50 flex items-center justify-between">
-                <h3 className="text-lg font-black text-gray-900">Product sold</h3>
+                <div className="flex gap-6">
+                  <button
+                    onClick={() => setActiveTab("all")}
+                    className={`text-lg font-black pb-2 border-b-2 transition-all cursor-pointer bg-transparent border-none ${
+                      activeTab === "all"
+                        ? "text-gray-900 border-[#1e3a5f]"
+                        : "text-gray-400 border-transparent hover:text-gray-600"
+                    }`}
+                  >
+                    All Products
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("sold")}
+                    className={`text-lg font-black pb-2 border-b-2 transition-all cursor-pointer bg-transparent border-none ${
+                      activeTab === "sold"
+                        ? "text-gray-900 border-[#1e3a5f]"
+                        : "text-gray-400 border-transparent hover:text-gray-600"
+                    }`}
+                  >
+                    Product Sold
+                  </button>
+                </div>
                 <button className="text-gray-300 hover:text-gray-500 bg-transparent border-none cursor-pointer">
                   <MdMoreHoriz size={24} />
                 </button>
               </div>
 
-              {soldProducts.length === 0 ? (
-                <div className="flex-1 flex flex-col items-center justify-center p-12 text-center">
-                  <ClipboardIllustration />
-                  <p className="text-gray-500 font-bold mt-2">No product sold yet</p>
-                  {isNewUser && (
-                    <>
-                      <p className="text-gray-400 text-xs mt-1 mb-8">You haven't add any product yet</p>
+              {activeTab === "all" ? (
+                <>
+                  <div className="px-6 py-4 bg-gray-50/40 border-b border-gray-50 flex items-center gap-3">
+                    <input
+                      type="text"
+                      placeholder="Search by product name or category..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="flex-1 px-4 py-2.5 text-xs border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    />
+                  </div>
+
+                  {products.length === 0 ? (
+                    <div className="flex-1 flex flex-col items-center justify-center p-12 text-center">
+                      <ClipboardIllustration />
+                      <p className="text-gray-500 font-bold mt-2">No products in inventory yet</p>
+                      <p className="text-gray-400 text-xs mt-1 mb-8">Get started by creating your first product</p>
                       <button
                         onClick={() => setIsAddOpen(true)}
                         className="bg-[#1e3a5f] text-white px-10 py-3.5 rounded-xl font-bold text-sm hover:bg-[#2a4a7f] transition-all border-none cursor-pointer shadow-md active:scale-95"
                       >
                         Add Product
                       </button>
-                    </>
-                  )}
-                </div>
+                    </div>
+                  ) : (() => {
+                    const filtered = products.filter(
+                      (p: any) =>
+                        p.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        p.category?.toLowerCase().includes(searchQuery.toLowerCase())
+                    );
+
+                    if (filtered.length === 0) {
+                      return (
+                        <div className="flex-1 flex flex-col items-center justify-center p-12 text-center">
+                          <ClipboardIllustration />
+                          <p className="text-gray-500 font-bold mt-2">No products match search query</p>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left text-sm">
+                          <thead className="bg-gray-50/30 text-gray-400 font-bold text-[11px] uppercase tracking-wider">
+                            <tr>
+                              <th className="px-6 py-5">Product Name</th>
+                              <th className="px-6 py-5">Category</th>
+                              <th className="px-6 py-5">Price</th>
+                              <th className="px-6 py-5">Stock</th>
+                              <th className="px-6 py-5 text-right pr-8">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-50">
+                            {filtered.map((p: any) => {
+                              const isLow = p.stockQuantity > 0 && p.stockQuantity <= 20;
+                              const isOut = p.stockQuantity === 0;
+
+                              return (
+                                <tr key={p._id} className="hover:bg-gray-50/50 transition-colors">
+                                  <td className="px-6 py-4">
+                                    <div className="flex items-center gap-3">
+                                      <div className="w-10 h-10 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                                        {p.image ? (
+                                          <img src={p.image} className="w-full h-full object-cover" />
+                                        ) : (
+                                          <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-400">📦</div>
+                                        )}
+                                      </div>
+                                      <div>
+                                        <span className="font-bold text-gray-800 block leading-tight">{p.name}</span>
+                                        <span className="text-[10px] text-gray-400 font-medium">{p.brand}</span>
+                                      </div>
+                                    </div>
+                                  </td>
+                                  <td className="px-6 py-4 font-semibold text-gray-500 text-xs">{p.category}</td>
+                                  <td className="px-6 py-4 font-bold text-gray-700">${p.sellingPrice}</td>
+                                  <td className="px-6 py-4">
+                                    <span className={`px-2.5 py-1 rounded-md font-bold text-xs ${
+                                      isOut
+                                        ? "bg-red-50 text-red-500 border border-red-100"
+                                        : isLow
+                                        ? "bg-amber-50 text-amber-500 border border-amber-100"
+                                        : "bg-green-50 text-green-600 border border-green-100"
+                                    }`}>
+                                      {p.stockQuantity} {isOut ? "(Out of Stock)" : isLow ? "(Low Stock)" : ""}
+                                    </span>
+                                  </td>
+                                  <td className="px-6 py-4 text-right pr-8 space-x-1 whitespace-nowrap">
+                                    <button
+                                      onClick={() => {
+                                        setSelectedProductId(p._id);
+                                        setIsStockInOpen(true);
+                                      }}
+                                      className="px-2 py-1 bg-blue-50 text-[#3b82f6] hover:bg-blue-100 hover:text-blue-700 text-[10px] font-bold rounded-lg transition-all cursor-pointer border-none bg-transparent active:scale-95"
+                                    >
+                                      Stock In
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        setSelectedProductId(p._id);
+                                        setIsSellOpen(true);
+                                      }}
+                                      className="px-2 py-1 bg-green-50 text-[#10b981] hover:bg-green-100 hover:text-green-700 text-[10px] font-bold rounded-lg transition-all cursor-pointer border-none bg-transparent active:scale-95"
+                                    >
+                                      Sell
+                                    </button>
+                                    <button
+                                      onClick={() => handleEdit(p)}
+                                      className="px-2 py-1 bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-gray-700 text-[10px] font-bold rounded-lg transition-all cursor-pointer border-none bg-transparent active:scale-95"
+                                    >
+                                      Edit
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        if (confirm(`Are you sure you want to delete ${p.name}?`)) {
+                                          deleteProduct(p._id);
+                                        }
+                                      }}
+                                      className="px-2 py-1 bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-700 text-[10px] font-bold rounded-lg transition-all cursor-pointer border-none bg-transparent active:scale-95"
+                                    >
+                                      Delete
+                                    </button>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    );
+                  })()}
+                </>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-sm">
-                    <thead className="bg-gray-50/30 text-gray-400 font-bold text-[11px] uppercase tracking-wider">
-                      <tr>
-                        <th className="px-6 py-5">Product Name</th>
-                        <th className="px-6 py-5">Price</th>
-                        <th className="px-6 py-5">No sold</th>
-                        <th className="px-6 py-5">Stock</th>
-                        <th className="px-6 py-5">Total Amount</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-50">
-                      {soldProducts.map((p: any, i: number) => (
-                        <tr key={i} className="hover:bg-gray-50/50 transition-colors">
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
-                                {p.image ? <img src={p.image} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-400">📦</div>}
-                              </div>
-                              <span className="font-bold text-gray-800">{p.productName}</span>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 font-bold text-gray-700">${p.price}</td>
-                          <td className="px-6 py-4 font-bold text-gray-700">{p.noSold}</td>
-                          <td className="px-6 py-4">
-                            <span className="bg-[#e0f2fe] text-[#0369a1] px-3 py-1 rounded-md font-bold text-xs">
-                              {p.stock}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 font-bold text-gray-900">${p.totalAmount?.toLocaleString()}</td>
+                soldProducts.length === 0 ? (
+                  <div className="flex-1 flex flex-col items-center justify-center p-12 text-center">
+                    <ClipboardIllustration />
+                    <p className="text-gray-500 font-bold mt-2">No product sold yet</p>
+                    {isNewUser && (
+                      <>
+                        <p className="text-gray-400 text-xs mt-1 mb-8">You haven't add any product yet</p>
+                        <button
+                          onClick={() => setIsAddOpen(true)}
+                          className="bg-[#1e3a5f] text-white px-10 py-3.5 rounded-xl font-bold text-sm hover:bg-[#2a4a7f] transition-all border-none cursor-pointer shadow-md active:scale-95"
+                        >
+                          Add Product
+                        </button>
+                      </>
+                    )}
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm">
+                      <thead className="bg-gray-50/30 text-gray-400 font-bold text-[11px] uppercase tracking-wider">
+                        <tr>
+                          <th className="px-6 py-5">Product Name</th>
+                          <th className="px-6 py-5">Price</th>
+                          <th className="px-6 py-5">No sold</th>
+                          <th className="px-6 py-5">Stock</th>
+                          <th className="px-6 py-5">Total Amount</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody className="divide-y divide-gray-50">
+                        {soldProducts.map((p: any, i: number) => (
+                          <tr key={i} className="hover:bg-gray-50/50 transition-colors">
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
+                                  {p.image ? <img src={p.image} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-400">📦</div>}
+                                </div>
+                                <span className="font-bold text-gray-800">{p.productName}</span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 font-bold text-gray-700">${p.price}</td>
+                            <td className="px-6 py-4 font-bold text-gray-700">{p.noSold}</td>
+                            <td className="px-6 py-4">
+                              <span className="bg-[#e0f2fe] text-[#0369a1] px-3 py-1 rounded-md font-bold text-xs">
+                                {p.stock}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 font-bold text-gray-900">${p.totalAmount?.toLocaleString()}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )
               )}
             </div>
           </div>
@@ -348,6 +519,22 @@ const InventoryDashboard = () => {
         onClose={handleCloseSidebar}
         onSuccess={refreshData}
         product={editingProduct}
+      />
+
+      <StockInModal
+        isOpen={isStockInOpen}
+        onClose={() => setIsStockInOpen(false)}
+        onSuccess={refreshData}
+        products={products}
+        productId={selectedProductId}
+      />
+
+      <SellProductModal
+        isOpen={isSellOpen}
+        onClose={() => setIsSellOpen(false)}
+        onSuccess={refreshData}
+        products={products}
+        productId={selectedProductId}
       />
     </div>
   );
