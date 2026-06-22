@@ -8,6 +8,8 @@ export interface StatItem {
 }
 
 export interface Order {
+    id?: string;
+    status?: string;
     trackingNo: string;
     productName: string;
     price: number;
